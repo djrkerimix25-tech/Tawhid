@@ -1,0 +1,3347 @@
+𝐌𝐱 𝐓𝐄𝐀𝐌 𝐎𝐖𝐍𝐄𝐑 FAHIM:
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Cortek Pro — Trading Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            void: '#090b0e',
+            panel: '#12151a',
+            panel2: '#181c23',
+            line: '#232934',
+            bull: '#16c784',
+            bear: '#ea3943',
+            accent: '#00b86b',
+          },
+        },
+      },
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: #07090c;
+      color: #f3f4f6;
+      font-family: 'Inter', system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0d1015;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #272e3b;
+      border-radius: 999px;
+    }
+
+    @keyframes spinRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 22px rgba(22, 199, 132, 0.35), 0 0 45px rgba(22, 199, 132, 0.14); }
+      50% { box-shadow: 0 0 34px rgba(22, 199, 132, 0.65), 0 0 70px rgba(22, 199, 132, 0.25); }
+    }
+    .spinner-ring {
+      animation: spinRing 1.15s linear infinite;
+    }
+    .logo-glow {
+      animation: pulseGlow 2.2s ease-in-out infinite;
+    }
+
+    .chart-bg-0 {
+      background-color: #0d1015;
+      background-image:
+        radial-gradient(circle at 22% 24%, rgba(255,255,255,0.035) 0%, transparent 32%),
+        radial-gradient(circle at 75% 68%, rgba(22,199,132,0.04) 0%, transparent 40%),
+        repeating-linear-gradient(125deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 14px, transparent 14px, transparent 34px);
+    }
+    .chart-bg-1 {
+      background-color: #090c10;
+      background-image:
+        radial-gradient(circle at 50% 15%, rgba(0, 184, 107, 0.16), transparent 55%),
+        linear-gradient(180deg, rgba(16, 22, 30, 0.72) 0%, rgba(7, 9, 13, 0.96) 100%);
+    }
+    .chart-bg-2 {
+      background-color: #0b0e14;
+      background-image:
+        radial-gradient(circle at 80% 25%, rgba(56, 189, 248, 0.14), transparent 45%),
+        radial-gradient(circle at 18% 80%, rgba(22, 199, 132, 0.12), transparent 45%);
+    }
+    .chart-bg-3 {
+      background-color: #0c0d11;
+      background-image: radial-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .chart-bg-4 {
+      background-color: #0b0d0e;
+      background-image: linear-gradient(135deg, rgba(22, 199, 132, 0.11) 0%, rgba(15, 23, 42, 0.85) 50%, rgba(234, 57, 67, 0.09) 100%);
+    }
+
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+
+    .toast-enter {
+      animation: toastSlide 0.25s ease-out forwards;
+    }
+    @keyframes toastSlide {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-[#07090c] text-gray-100 min-h-screen flex items-center justify-center sm:p-4">
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed top-4 left-1/2 -translate-x-1/2 z-[120] flex flex-col gap-2 w-[92%] max-w-md pointer-events-none"></div>
+
+<!-- 1. 5-SECOND SPINNING PRELOADER WITH GLOWING EMBLEM -->
+  <div id="preloaderScreen" class="fixed inset-0 z-[100] bg-[#07090d] flex flex-col items-center justify-center px-6 text-center select-none">
+    <div class="relative w-28 h-28 flex items-center justify-center mb-6">
+      <div class="absolute inset-0 rounded-full border-[3px] border-[#1b2230] border-t-[#16c784] spinner-ring"></div>
+      <div class="absolute inset-2 rounded-full border border-[#16c784]/25"></div>
+      <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#13261f] via-[#101620] to-[#0b0e14] border border-[#16c784]/60 flex items-center justify-center logo-glow">
+        <svg class="w-10 h-10 text-[#16c784]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+          <path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M17 7h4v4" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+    </div>
+    <h1 class="text-2xl font-extrabold tracking-tight text-white">Cortek <span class="text-[#16c784]">Pro</span></h1>
+    <p class="text-[11px] uppercase tracking-[0.24em] text-emerald-300/80 mt-1">Synchronized Multi-Market Engine</p>
+    <div class="mt-6 w-60 bg-[#141922] rounded-full h-2 overflow-hidden border border-[#222936]">
+      <div id="preloaderBar" class="h-full bg-gradient-to-r from-[#00b86b] to-[#34d399] transition-all duration-100" style="width: 0%;"></div>
+    </div>
+    <p id="preloaderTimerText" class="text-xs font-mono text-gray-300 mt-2.5">Initializing terminal... 5s</p>
+  </div>
+
+  <!-- 2. LOGIN / REGISTRATION GATE -->
+  <div id="authScreen" class="hidden w-full max-w-[440px] min-h-screen sm:min-h-[820px] bg-[#11141a] sm:rounded-[28px] border border-[#222834] shadow-2xl overflow-hidden flex flex-col justify-between p-5 sm:p-6">
+    <div>
+      <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-[#16c784]/15 border border-[#16c784]/50 flex items-center justify-center logo-glow">
+            <svg class="w-5 h-5 text-[#16c784]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+              <path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M17 7h4v4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-base font-extrabold text-white leading-none">Cortek <span class="text-[#16c784]">Pro</span></div>
+            <div class="text-[11px] text-gray-400 mt-0.5">60-Day Persistent Account</div>
+          </div>
+        </div>
+
+        <select id="authLangSelect" onchange="setAppLanguage(this.value)" aria-label="Auth Language"
+          class="bg-[#0b0e13] border border-[#242c3a] rounded-xl px-2.5 py-1.5 text-xs font-semibold text-gray-200 focus:outline-none focus:border-[#16c784]">
+        </select>
+      </div>
+
+      <div id="authNoticeBanner" class="mb-4 p-3 rounded-xl bg-[#16c784]/10 border border-[#16c784]/30 text-xs text-emerald-200 leading-relaxed">
+        Register once with your unique Gmail & Phone number, verify with Get Code, and sign in anytime within 60 days.
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 bg-[#0b0e13] p-1.5 rounded-2xl border border-[#222936] mb-4">
+        <button type="button" id="tabLoginBtn" onclick="switchAuthTab('login')" class="py-2.5 rounded-xl text-xs font-bold bg-[#16c784] text-[#07120d] transition">
+          Login
+        </button>
+        <button type="button" id="tabRegisterBtn" onclick="switchAuthTab('register')" class="py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition">
+          Registration
+        </button>
+      </div>
+
+<!-- LOGIN FORM -->
+      <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Gmail / Email or Phone Number</label>
+          <input id="loginIdentifier" type="text" required placeholder="trader@gmail.com or 017XXXXXXXX"
+            class="w-full px-3.5 py-3 rounded-xl bg-[#0b0e13] border border-[#252c3a] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#16c784]" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Password</label>
+          <input id="loginPassword" type="password" required placeholder="Enter your password"
+            class="w-full px-3.5 py-3 rounded-xl bg-[#0b0e13] border border-[#252c3a] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#16c784]" />
+        </div>
+        <div class="flex items-center justify-between text-xs text-gray-400">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked class="accent-[#16c784] rounded" />
+            <span>Keep signed in (60 days)</span>
+          </label>
+          <button type="button" onclick="showToast('Use the exact Gmail/Phone & password you registered with.', 'info')" class="text-[#16c784] hover:underline">
+            Account help?
+          </button>
+        </div>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-[#16c784] hover:bg-[#14b577] text-[#06110c] font-extrabold text-sm shadow-lg shadow-emerald-950/40 transition">
+          Sign In
+        </button>
+      </form>
+
+      <!-- REGISTRATION FORM -->
+      <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="hidden space-y-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Gmail / Email</label>
+            <input id="regEmail" type="email" required placeholder="name@gmail.com"
+              class="w-full px-3 py-2.5 rounded-xl bg-[#0b0e13] border border-[#252c3a] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#16c784]" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Phone Number</label>
+            <input id="regPhone" type="tel" required placeholder="017XXXXXXXX"
+              class="w-full px-3 py-2.5 rounded-xl bg-[#0b0e13] border border-[#252c3a] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#16c784]" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Password</label>
+            <input id="regPassword" type="password" required minlength="6" placeholder="Min 6 chars"
+              class="w-full px-3 py-2.5 rounded-xl bg-[#0b0e13] border border-[#252c3a] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#16c784]" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Confirm Password</label>
+            <input id="regConfirmPassword" type="password" required minlength="6" placeholder="Repeat password"
+              class="w-full px-3 py-2.5 rounded-xl bg-[#0b0e13] border border-[#252c3a] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#16c784]" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Account Currency</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" id="currUsdBtn" onclick="selectAuthCurrency('USD')"
+              class="py-2 px-3 rounded-xl border border-[#16c784] bg-[#16c784]/15 text-white text-xs font-bold flex items-center justify-center gap-1.5">
+
+<span>🇺🇸</span> USD ($)
+            </button>
+            <button type="button" id="currBdtBtn" onclick="selectAuthCurrency('BDT')"
+              class="py-2 px-3 rounded-xl border border-[#252c3a] bg-[#0b0e13] text-gray-300 text-xs font-bold flex items-center justify-center gap-1.5">
+              <span>🇧🇩</span> BDT (৳)
+            </button>
+          </div>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[#0b0e13] border border-[#232a38]">
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-xs font-semibold text-gray-300">Verification Code</span>
+            <button type="button" onclick="generateDynamicAuthCode()" class="px-2.5 py-1 rounded-lg bg-[#1b222e] hover:bg-[#242d3d] text-[11px] font-bold text-[#16c784] border border-[#16c784]/35">
+              Get Code
+            </button>
+          </div>
+          <div class="flex items-center gap-2">
+            <input id="regCodeInput" type="text" maxlength="6" required placeholder="Click Get Code"
+              class="flex-1 px-3 py-2 rounded-lg bg-[#12161f] border border-[#252c3a] font-mono text-sm text-white focus:outline-none focus:border-[#16c784]" />
+            <div id="generatedCodeDisplay" class="px-2.5 py-2 rounded-lg bg-[#161c26] border border-[#283142] font-mono text-xs text-amber-300 min-w-[78px] text-center">
+              ------
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-[#16c784] hover:bg-[#14b577] text-[#06110c] font-extrabold text-sm shadow-lg shadow-emerald-950/40 transition">
+          Register & Enter Platform
+        </button>
+      </form>
+    </div>
+
+    <div class="pt-4 mt-4 border-t border-[#1e2430] flex items-center justify-between text-[11px] text-gray-500">
+      <span>Cortek Pro v4.0</span>
+      <span>1 USD = 120 BDT</span>
+    </div>
+  </div>
+
+  <!-- 3. MAIN MOBILE-FIRST TRADING APPLICATION SHELL -->
+  <div id="appShell" class="hidden w-full max-w-[440px] h-screen sm:h-[840px] max-h-[100dvh] bg-[#11141a] sm:rounded-[28px] border border-[#222834] shadow-2xl flex flex-col overflow-hidden relative">
+
+    <!-- TOP HEADER WITH THREE-DOT MENU (⋮) -->
+    <header class="h-14 px-3.5 bg-[#12161d] border-b border-[#1f2530] flex items-center justify-between shrink-0 z-30 relative">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-[#16c784]/15 border border-[#16c784]/50 flex items-center justify-center logo-glow">
+          <svg class="w-4 h-4 text-[#16c784]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M3 17l6-6 4 4 8-8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M17 7h4v4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <div class="text-sm font-extrabold text-white tracking-tight">Cortek<span class="text-[#16c784]">Pro</span></div>
+          <div id="headerCurrencySubtitle" class="text-[9px] uppercase tracking-[0.14em] text-gray-400">USD • SYNCED</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <button type="button" onclick="openNotificationsModal()" title="Notifications" class="relative w-8 h-8 rounded-xl bg-[#181d27] hover:bg-[#202734] border border-[#262e3d] flex items-center justify-center text-gray-300">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span class="w-2 h-2 rounded-full bg-[#16c784] absolute top-1.5 right-1.5"></span>
+        </button>
+
+<button type="button" onclick="switchTab('settings')" title="Settings" class="w-8 h-8 rounded-xl bg-[#181d27] hover:bg-[#202734] border border-[#262e3d] flex items-center justify-center text-amber-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="4" />
+            <path stroke-linecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32l1.41-1.41" />
+          </svg>
+        </button>
+
+        <!-- Three-Dot (⋮) Menu -->
+        <button type="button" onclick="toggleThreeDotMenu()" title="More Options" class="w-8 h-8 rounded-xl bg-[#181d27] hover:bg-[#202734] border border-[#262e3d] flex items-center justify-center text-gray-200 font-bold">
+          ⋮
+        </button>
+      </div>
+
+      <!-- Three-Dot Dropdown Menu -->
+      <div id="threeDotDropdown" class="hidden absolute right-3 top-14 w-56 rounded-2xl bg-[#161c26] border border-[#2b3446] shadow-2xl p-1.5 space-y-1 z-40 text-xs">
+        <button type="button" onclick="closeThreeDotMenu(); openInviteFriendsModal();" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#202836] text-emerald-300 font-bold flex items-center justify-between">
+          <span>🎁 Invite Friends</span>
+          <span class="text-[10px] font-mono bg-[#16c784]/15 px-1.5 py-0.5 rounded text-[#16c784]">+120৳</span>
+        </button>
+        <button type="button" onclick="closeThreeDotMenu(); switchTab('history');" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#202836] text-gray-200 font-semibold">
+          📜 History (Dep / With / Trades)
+        </button>
+        <button type="button" onclick="closeThreeDotMenu(); openRulesModal();" class="w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#202836] text-amber-300 font-semibold">
+          📋 Rules & Turnover Limits
+        </button>
+        <a href="https://wa.me/8801750510914" target="_blank" rel="noopener" onclick="closeThreeDotMenu()" class="block w-full text-left px-3 py-2.5 rounded-xl hover:bg-[#202836] text-sky-300 font-semibold">
+          💬 WhatsApp Support (01750510914)
+        </a>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="mainContent" class="flex-1 overflow-y-auto relative">
+
+      <!-- VIEW 1: HOME / WALLET & MARKET PAIRS -->
+      <section id="view-home" class="p-4 space-y-3.5">
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 shadow-lg">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2 text-sm font-bold text-white">
+              <span class="text-[#16c784]">💼</span>
+              <span data-i18n="wallet">Wallet</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span id="currencyBadge" class="px-2 py-0.5 rounded-md bg-[#1e2532] text-[11px] font-mono font-bold text-emerald-300 border border-[#2b3446]">USD</span>
+              <button type="button" onclick="toggleCurrency()" class="px-2 py-0.5 rounded-md bg-[#1a202c] hover:bg-[#232b3b] text-[10px] text-gray-300 border border-[#2b3446]">
+                Switch
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 mb-3">
+            <div onclick="setActiveAccountMode('live')" class="cursor-pointer rounded-xl bg-[#11151c] border border-[#16c784]/60 p-3 transition hover:border-[#16c784]">
+              <div class="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-[#16c784]">
+                <span class="w-1.5 h-1.5 rounded-full bg-[#16c784]"></span>
+                <span>Live Balance</span>
+              </div>
+              <div id="homeLiveBalance" class="text-base font-extrabold font-mono text-white mt-1">$0.00</div>
+              <div id="homeTurnoverHint" class="text-[10px] text-gray-400 mt-0.5 truncate">Turnover: 0 / 0</div>
+            </div>
+
+<div onclick="setActiveAccountMode('demo')" class="cursor-pointer rounded-xl bg-[#11151c] border border-[#252d3c] p-3 transition hover:border-amber-400/60">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5 text-[10px] font-bold tracking-wider uppercase text-amber-400">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  <span>Demo Balance</span>
+                </div>
+                <button type="button" onclick="event.stopPropagation(); refreshDemoBalance();" title="Reset Demo to 10,000"
+                  class="text-[10px] px-1.5 py-0.5 rounded bg-amber-400/15 text-amber-300 hover:bg-amber-400/25 font-semibold">
+                  ↻ 10k
+                </button>
+              </div>
+              <div id="homeDemoBalance" class="text-base font-extrabold font-mono text-white mt-1">10,000.00</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Practice funds</div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between gap-2 mb-3 text-[11px]">
+            <span id="activeAccountLabel" class="px-2.5 py-1 rounded-full bg-[#16c784]/15 border border-[#16c784]/35 font-semibold text-[#16c784]">
+              ● Active: Live Account
+            </span>
+            <button type="button" onclick="openRulesModal()" class="text-amber-300 hover:underline font-semibold">
+              Rules & Turnover →
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="openDepositModal()" class="py-2.5 px-4 rounded-xl bg-[#16c784] hover:bg-[#14b376] text-[#06110c] font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-950/40 transition">
+              <span>↓ Deposit</span>
+            </button>
+            <button type="button" onclick="openWithdrawModal()" class="py-2.5 px-4 rounded-xl bg-[#1c212b] hover:bg-[#242b38] text-gray-200 border border-[#2b3446] font-bold text-xs flex items-center justify-center gap-1.5 transition">
+              <span>↑ Withdraw</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="relative">
+          <svg class="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="7" />
+            <path stroke-linecap="round" d="M21 21l-4.35-4.35" />
+          </svg>
+          <input id="marketSearchInput" type="text" oninput="renderMarketList()" placeholder="Search market pair..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#151921] border border-[#232a38] text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#16c784]" />
+        </div>
+
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1">
+          <button type="button" data-filter="ALL" onclick="setMarketFilter('ALL')" class="market-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#16c784] text-[#06110c]">All</button>
+          <button type="button" data-filter="FAV" onclick="setMarketFilter('FAV')" class="market-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#161b24] text-gray-300 border border-[#242c3a]">★ Fav</button>
+          <button type="button" data-filter="OTC" onclick="setMarketFilter('OTC')" class="market-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#161b24] text-gray-300 border border-[#242c3a]">OTC</button>
+          <button type="button" data-filter="REAL" onclick="setMarketFilter('REAL')" class="market-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#161b24] text-gray-300 border border-[#242c3a]">Real</button>
+        </div>
+
+        <div id="marketSessionBanner" class="px-3 py-2 rounded-xl bg-[#151a23] border border-[#242c3b] text-[11px] text-gray-300 flex items-center justify-between">
+
+<span id="marketSessionText">Shared clock market active • Seamless candles</span>
+          <span class="text-[#16c784] font-mono font-semibold">SYNC</span>
+        </div>
+
+        <div id="marketPairList" class="space-y-2 pb-4"></div>
+      </section>
+
+      <!-- VIEW 2: LIVE CANDLESTICK CHART TERMINAL -->
+      <section id="view-chart" class="hidden h-full flex flex-col justify-between select-none">
+        <!-- Top Terminal Strip -->
+        <div class="px-2.5 py-2 bg-[#12161d] border-b border-[#1f2633] flex items-center justify-between gap-1.5 shrink-0">
+          <button type="button" onclick="toggleActiveAccountMode()" class="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-[#181e29] border border-[#273041] text-left">
+            <span class="w-2 h-2 rounded-full bg-[#16c784]"></span>
+            <div>
+              <div id="chartModeTag" class="text-[8px] font-bold uppercase tracking-wider text-[#16c784]">LIVE</div>
+              <div id="chartBalanceValue" class="text-xs font-mono font-extrabold text-white leading-none mt-0.5">$0.00</div>
+            </div>
+          </button>
+
+          <!-- Candle Timeframe (1m, 2m, 3m, 5m) -->
+          <div class="flex items-center gap-0.5 bg-[#0d1016] p-1 rounded-xl border border-[#222938]">
+            <button type="button" data-tf="60" onclick="setTimeframe(60)" class="tf-btn px-1.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#16c784] text-[#06110c]">1m</button>
+            <button type="button" data-tf="120" onclick="setTimeframe(120)" class="tf-btn px-1.5 py-1 rounded-lg text-[10px] font-mono font-semibold text-gray-400 hover:text-white">2m</button>
+            <button type="button" data-tf="180" onclick="setTimeframe(180)" class="tf-btn px-1.5 py-1 rounded-lg text-[10px] font-mono font-semibold text-gray-400 hover:text-white">3m</button>
+            <button type="button" data-tf="300" onclick="setTimeframe(300)" class="tf-btn px-1.5 py-1 rounded-lg text-[10px] font-mono font-semibold text-gray-400 hover:text-white">5m</button>
+          </div>
+
+          <button type="button" onclick="openDepositModal()" class="px-2.5 py-1.5 rounded-xl bg-[#16c784] hover:bg-[#14b376] text-[#06110c] font-bold text-xs shrink-0">
+            Deposit
+          </button>
+        </div>
+
+        <!-- Sub-bar: Candle Style + Indicators/Tools Box + Zoom -->
+        <div class="px-2.5 py-1.5 bg-[#10141b]/95 border-b border-[#1c222e] flex items-center justify-between gap-1.5 text-[11px] shrink-0">
+          <!-- 3 Candlestick Styles Switcher -->
+          <div class="flex items-center gap-1 bg-[#0c1016] p-0.5 rounded-lg border border-[#232b3a]">
+            <button type="button" data-cstyle="STANDARD" onclick="setCandleStyle('STANDARD')" title="Standard Candles"
+              class="cstyle-btn px-1.5 py-1 rounded-md text-[10px] font-bold bg-[#16c784] text-[#06110c]">Std</button>
+            <button type="button" data-cstyle="HOLLOW" onclick="setCandleStyle('HOLLOW')" title="Hollow Candles"
+              class="cstyle-btn px-1.5 py-1 rounded-md text-[10px] font-semibold text-gray-400 hover:text-white">Hollow</button>
+            <button type="button" data-cstyle="HEIKIN" onclick="setCandleStyle('HEIKIN')" title="Heikin Ashi"
+              class="cstyle-btn px-1.5 py-1 rounded-md text-[10px] font-semibold text-gray-400 hover:text-white">HA</button>
+          </div>
+
+          <div class="flex items-center gap-1">
+            <!-- Indicators & Drawing Box (Starts clean until clicked) -->
+            <div class="relative">
+              <button type="button" onclick="toggleIndicatorBox()" id="indicatorBoxBtn"
+                class="px-2 py-1 rounded-lg bg-[#181e29] border border-[#283142] text-[10px] font-semibold text-gray-200 flex items-center gap-1">
+                <span>Indicators</span>
+                <span id="activeIndicatorCountBadge" class="px-1 rounded bg-[#16c784]/20 text-[#16c784] font-mono">0</span>
+              </button>
+
+<div id="indicatorBoxPopover" class="hidden fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-28 sm:top-8 z-40 w-auto sm:w-64 rounded-2xl bg-[#151b24] border border-[#2b3549] shadow-2xl p-2.5 space-y-1.5 max-h-[65vh] overflow-y-auto">
+                <div class="flex items-center justify-between pb-1.5 border-b border-[#232c3d]">
+                  <span class="text-[11px] font-extrabold text-white">10 Indicators & Draw Tools</span>
+                  <button type="button" onclick="clearAllIndicators()" class="text-[10px] text-red-400 hover:underline font-semibold">Clear All</button>
+                </div>
+                <div id="indicatorChecklistContainer" class="space-y-1"></div>
+              </div>
+            </div>
+
+            <button type="button" onclick="adjustZoom(0.84)" title="Zoom Out" class="w-6 h-6 rounded-lg bg-[#181e29] border border-[#283142] flex items-center justify-center font-bold text-gray-200">−</button>
+            <button type="button" onclick="adjustZoom(1.18)" title="Zoom In" class="w-6 h-6 rounded-lg bg-[#181e29] border border-[#283142] flex items-center justify-center font-bold text-gray-200">+</button>
+          </div>
+        </div>
+
+        <!-- CANDLESTICK CANVAS CONTAINER -->
+        <div id="chartCanvasWrap" class="relative flex-1 w-full chart-bg-0 overflow-hidden">
+          <canvas id="candlestickCanvas" class="w-full h-full"></canvas>
+
+          <div class="absolute top-2.5 left-2.5 flex flex-col gap-1 pointer-events-none">
+            <div class="px-2 py-1 rounded-lg bg-[#12161e]/90 border border-[#252d3c] flex items-center gap-2">
+              <span id="chartClockUtc" class="text-[10px] font-mono text-gray-400">00:00:00</span>
+              <span class="text-[10px] text-gray-500">|</span>
+              <span id="candleCountdownText" class="text-[11px] font-mono font-extrabold text-[#16c784]">00:59</span>
+            </div>
+            <div id="activeTradesFloating" class="flex flex-col gap-1"></div>
+          </div>
+
+          <button type="button" onclick="toggleHistoryDrawer()" class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-[#131822]/90 hover:bg-[#1b2230] border border-[#283142] text-[10px] font-semibold text-gray-200 flex items-center gap-1.5 shadow-md">
+            <span>24h Trades</span>
+            <span id="historyBadgeCount" class="px-1.5 rounded bg-[#16c784]/20 text-[#16c784] font-mono">0W/0L</span>
+          </button>
+
+          <div id="historyDrawer" class="hidden absolute top-11 right-2.5 left-2.5 sm:left-auto sm:w-80 max-h-56 rounded-2xl bg-[#131821]/95 border border-[#2a3345] shadow-2xl p-3 z-20 flex flex-col">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-[#222938]">
+              <div>
+                <div class="text-xs font-bold text-white">Last 24h Trade History</div>
+                <div id="historyWinLossSummary" class="text-[10px] font-mono text-gray-400">Wins: 0 • Losses: 0</div>
+              </div>
+              <button type="button" onclick="toggleHistoryDrawer()" class="text-xs text-gray-400 hover:text-white px-2 py-0.5">✕</button>
+            </div>
+            <div id="historyListContainer" class="overflow-y-auto space-y-1.5 text-xs flex-1"></div>
+          </div>
+        </div>
+
+        <!-- BOTTOM TRADING CONTROL DECK -->
+        <div class="p-2.5 bg-[#12161d] border-t border-[#1f2633] space-y-2 shrink-0">
+          <button type="button" onclick="openPairPickerModal()" class="w-full px-3 py-1.5 rounded-xl bg-[#181e29] hover:bg-[#1f2634] border border-[#283142] flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="selectedPairFlags" class="text-sm">🇪🇺🇦🇺</span>
+              <div class="text-left">
+                <div id="selectedPairName" class="text-xs font-extrabold text-white leading-none">EUR/AUD OTC</div>
+
+<div id="selectedPairPayout" class="text-[10px] font-semibold text-[#16c784] mt-0.5">PAYOUT 92%</div>
+              </div>
+            </div>
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          <!-- Trade Time (5s - 5m) + Investment Amount (Min $1 / ৳30) -->
+          <div class="grid grid-cols-2 gap-2">
+            <div class="relative px-2.5 py-1.5 rounded-xl bg-[#0e1218] border border-[#283142]">
+              <div class="flex items-center justify-between text-[9px] uppercase tracking-wider text-gray-400">
+                <span>Trade Time</span>
+                <span class="text-amber-300 font-mono">5s–5m</span>
+              </div>
+              <div class="flex items-center justify-between gap-1 mt-0.5">
+                <button type="button" onclick="stepTradeDuration(-1)" class="w-6 h-6 rounded-md bg-[#19202c] text-gray-300 font-bold text-sm">−</button>
+                <button type="button" onclick="toggleTradeTimePicker()" id="tradeDurationDisplayBtn"
+                  class="flex-1 text-center font-mono font-extrabold text-sm text-[#16c784] py-0.5 rounded hover:bg-[#161c26]">
+                  15s
+                </button>
+                <button type="button" onclick="stepTradeDuration(1)" class="w-6 h-6 rounded-md bg-[#19202c] text-gray-300 font-bold text-sm">+</button>
+              </div>
+
+              <div id="tradeTimePopover" class="hidden absolute bottom-14 left-0 right-0 z-30 rounded-2xl bg-[#161c26] border border-[#2c364b] shadow-2xl p-2">
+                <div class="grid grid-cols-4 gap-1.5">
+                  <button type="button" data-dur="5" onclick="selectTradeDuration(5)" class="dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#1e2532] text-gray-200">5s</button>
+                  <button type="button" data-dur="15" onclick="selectTradeDuration(15)" class="dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#16c784] text-[#06110c]">15s</button>
+                  <button type="button" data-dur="30" onclick="selectTradeDuration(30)" class="dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#1e2532] text-gray-200">30s</button>
+                  <button type="button" data-dur="60" onclick="selectTradeDuration(60)" class="dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#1e2532] text-gray-200">1m</button>
+                  <button type="button" data-dur="120" onclick="selectTradeDuration(120)" class="dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#1e2532] text-gray-200">2m</button>
+                  <button type="button" data-dur="180" onclick="selectTradeDuration(180)" class="dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#1e2532] text-gray-200">3m</button>
+                  <button type="button" data-dur="300" onclick="selectTradeDuration(300)" class="dur-chip col-span-2 py-1.5 rounded-lg font-mono text-xs font-bold bg-[#1e2532] text-gray-200">5m</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="px-2.5 py-1.5 rounded-xl bg-[#0e1218] border border-[#283142]">
+              <div class="flex items-center justify-between text-[9px] uppercase tracking-wider text-gray-400">
+                <span id="minTradeHintLabel">Min $1</span>
+                <span id="estPayoutPreview" class="text-[#16c784] font-mono">+1.92</span>
+              </div>
+              <div class="flex items-center justify-between gap-1 mt-0.5">
+                <button type="button" onclick="stepInvestment(-1)" class="w-6 h-6 rounded-md bg-[#19202c] text-gray-300 font-bold text-sm">−</button>
+                <input id="tradeInvestmentInput" type="number" min="1" step="any" value="1" oninput="updatePayoutPreview()"
+
+class="w-full bg-transparent text-center font-mono font-extrabold text-sm text-white focus:outline-none" />
+                <button type="button" onclick="stepInvestment(1)" class="w-6 h-6 rounded-md bg-[#19202c] text-gray-300 font-bold text-sm">+</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5">
+            <button type="button" onclick="placeTrade('UP')" class="py-2.5 px-4 rounded-xl bg-[#16c784] hover:bg-[#14b577] active:scale-[0.99] text-white font-extrabold text-sm flex items-center justify-between shadow-lg shadow-emerald-950/50 transition">
+              <span data-i18n="up">Up</span>
+              <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">▲</span>
+            </button>
+            <button type="button" onclick="placeTrade('DOWN')" class="py-2.5 px-4 rounded-xl bg-[#ea3943] hover:bg-[#d63039] active:scale-[0.99] text-white font-extrabold text-sm flex items-center justify-between shadow-lg shadow-red-950/50 transition">
+              <span data-i18n="down">Down</span>
+              <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-xs">▼</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 3: SETTINGS (AI LIVE CHAT, 50 LANGUAGES, CURRENCY CONVERTER, CUSTOM PHOTO, UNBLOCK) -->
+      <section id="view-settings" class="hidden p-4 space-y-4 pb-8">
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-extrabold uppercase tracking-wider text-white" data-i18n="settings">Platform Settings</h2>
+            <p class="text-[11px] text-gray-400">AI Chat, 50 Languages, BDT/USD & Chart Style</p>
+          </div>
+          <button type="button" onclick="switchTab('chart')" class="text-xs font-semibold text-[#16c784] hover:underline">Chart →</button>
+        </div>
+
+        <!-- AI LIVE CHAT ASSISTANT + WHATSAPP ESCALATION -->
+        <div class="rounded-2xl bg-[#151921] border border-[#16c784]/35 p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#16c784]"></span>
+              <span class="text-xs font-extrabold text-white">AI Live Chat Assistant</span>
+            </div>
+            <a href="https://wa.me/8801750510914?text=Hello%20Cortek%20Pro%20Support%2C%20I%20need%20help." target="_blank" rel="noopener"
+              class="px-2.5 py-1 rounded-lg bg-[#16c784] text-[#06110c] font-bold text-[10px]">
+              WhatsApp: 01750510914
+            </a>
+          </div>
+
+          <div id="aiChatMessages" class="h-44 overflow-y-auto space-y-2 p-2.5 rounded-xl bg-[#0c1016] border border-[#222938] text-xs">
+            <div class="p-2 rounded-lg bg-[#161e2a] text-gray-200 leading-relaxed">
+              <span class="font-bold text-[#16c784]">AI Assistant:</span> Ask me about deposits, withdrawals, turnover rules, indicators, or account issues. For urgent/serious problems, contact WhatsApp <strong>01750510914</strong> directly.
+            </div>
+          </div>
+
+          <form onsubmit="sendAiChatMessage(event)" class="flex gap-2">
+            <input id="aiChatInput" type="text" required placeholder="Type your question or issue..."
+              class="flex-1 px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-xs text-white focus:outline-none focus:border-[#16c784]" />
+            <button type="submit" class="px-3.5 py-2 rounded-xl bg-[#16c784] text-[#06110c] font-bold text-xs">Send</button>
+          </form>
+        </div>
+
+        <!-- 50 LANGUAGES SELECTOR -->
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 space-y-2.5">
+
+<div class="flex items-center justify-between">
+            <label for="settingsLangSelect" class="text-xs font-bold text-white">Language (50 World Languages)</label>
+            <span id="activeLangCodeBadge" class="text-[11px] font-mono text-[#16c784]">EN</span>
+          </div>
+          <select id="settingsLangSelect" onchange="setAppLanguage(this.value)"
+            class="w-full px-3 py-2.5 rounded-xl bg-[#0e1218] border border-[#252d3c] text-xs text-white focus:outline-none focus:border-[#16c784]">
+          </select>
+          <p id="translatedSampleBanner" class="text-[11px] text-emerald-200/90 bg-[#0e1218] p-2.5 rounded-xl border border-[#202837]"></p>
+        </div>
+
+        <!-- CURRENCY CONVERTER (BDT ৳ <-> USD $) -->
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white">Currency Converter (BDT ৳ ↔ USD $)</span>
+            <span class="text-[10px] font-mono text-gray-400">Rate: $1 = ৳120</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] text-gray-400 mb-1">Amount</label>
+              <input id="convAmountInput" type="number" min="0.01" step="any" value="120" oninput="updateCurrencyConverter()"
+                class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-xs font-mono text-white" />
+            </div>
+            <div>
+              <label class="block text-[10px] text-gray-400 mb-1">Direction</label>
+              <select id="convDirectionSelect" onchange="updateCurrencyConverter()"
+                class="w-full px-2.5 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-xs text-white">
+                <option value="BDT_TO_USD">BDT (৳) → USD ($)</option>
+                <option value="USD_TO_BDT">USD ($) → BDT (৳)</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[#0e1218] border border-[#222938]">
+            <span id="convResultText" class="text-xs font-mono font-extrabold text-[#16c784]">120.00 ৳ = $1.00</span>
+            <button type="button" onclick="applyConvertedCurrencyToAccount()" class="px-2.5 py-1 rounded-lg bg-[#16c784]/20 border border-[#16c784]/40 text-[11px] font-bold text-[#16c784]">
+              Use Currency
+            </button>
+          </div>
+        </div>
+
+        <!-- CHART APPEARANCE + CUSTOM GALLERY IMAGE UPLOAD -->
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 space-y-3.5">
+          <div>
+            <div class="flex items-center justify-between text-xs text-gray-300 mb-1.5">
+              <span>Grid Opacity</span>
+              <span id="gridOpacityValue" class="font-mono font-bold text-white">10</span>
+            </div>
+            <div class="flex items-center gap-3 bg-[#0e1218] p-2 rounded-xl border border-[#242c3b]">
+              <button type="button" onclick="changeGridOpacity(-2)" class="w-8 h-8 rounded-lg bg-[#19202c] font-bold text-gray-200">−</button>
+              <div class="flex-1 text-center font-mono font-bold text-xs text-white" id="gridOpacityBarLabel">10 / 20</div>
+              <button type="button" onclick="changeGridOpacity(2)" class="w-8 h-8 rounded-lg bg-[#19202c] font-bold text-gray-200">+</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="text-xs font-semibold text-gray-200 mb-1.5">Up Trend Color</div>
+            <div id="upColorSwatches" class="grid grid-cols-5 gap-2 p-2 rounded-xl bg-[#0e1218] border border-[#242c3b]"></div>
+          </div>
+
+          <div>
+            <div class="text-xs font-semibold text-gray-200 mb-1.5">Down Trend Color</div>
+            <div id="downColorSwatches" class="grid grid-cols-5 gap-2 p-2 rounded-xl bg-[#0e1218] border border-[#242c3b]"></div>
+          </div>
+
+<div>
+            <div class="text-xs font-semibold text-gray-200 mb-1.5">Chart Background Presets & Gallery Photo</div>
+            <div class="grid grid-cols-5 gap-2 mb-2.5">
+              <button type="button" onclick="setChartBgPreset(0)" id="bgPresetBtn0" class="h-10 rounded-xl chart-bg-0 border-2 border-[#16c784]"></button>
+              <button type="button" onclick="setChartBgPreset(1)" id="bgPresetBtn1" class="h-10 rounded-xl chart-bg-1 border border-[#2b3446]"></button>
+              <button type="button" onclick="setChartBgPreset(2)" id="bgPresetBtn2" class="h-10 rounded-xl chart-bg-2 border border-[#2b3446]"></button>
+              <button type="button" onclick="setChartBgPreset(3)" id="bgPresetBtn3" class="h-10 rounded-xl chart-bg-3 border border-[#2b3446]"></button>
+              <button type="button" onclick="setChartBgPreset(4)" id="bgPresetBtn4" class="h-10 rounded-xl chart-bg-4 border border-[#2b3446]"></button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label class="flex-1 cursor-pointer py-2 px-3 rounded-xl bg-[#0e1218] hover:bg-[#151b24] border border-dashed border-[#323d52] text-xs font-semibold text-emerald-300 text-center">
+                <span>🖼️ Pick Photo from Gallery</span>
+                <input type="file" accept="image/*" onchange="handleCustomChartBgUpload(event)" class="hidden" />
+              </label>
+              <button type="button" onclick="clearCustomChartBg()" class="px-3 py-2 rounded-xl bg-[#1a202c] border border-[#2b3446] text-xs text-gray-300">
+                Reset BG
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ACCOUNT UNBLOCK FIELD (No code hint shown) -->
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 space-y-2.5">
+          <div class="text-xs font-bold text-gray-200">Account Status & Unlock</div>
+          <div id="accountLockStatusBanner" class="text-xs font-mono px-3 py-2 rounded-xl bg-[#0e1218] border border-[#232a38] text-emerald-300">
+            Status: Active
+          </div>
+          <form onsubmit="submitAccountUnlock(event)" class="flex gap-2">
+            <input id="unblockCodeInput" type="password" placeholder="Enter unlock code"
+              class="flex-1 px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-xs font-mono text-white focus:outline-none focus:border-[#16c784]" />
+            <button type="submit" class="px-3.5 py-2 rounded-xl bg-[#1b222f] hover:bg-[#242e40] border border-[#2e394e] text-xs font-bold text-white">
+              Unlock
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- VIEW 4: 24-HOUR MULTI-COUNTRY LEADERBOARD -->
+      <section id="view-leaderboard" class="hidden p-4 space-y-3 pb-8">
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 text-center">
+          <h2 class="text-lg font-extrabold text-white">24h Global Leaderboard</h2>
+          <p id="leaderboardResetInfo" class="text-[11px] font-bold tracking-wider uppercase text-[#16c784] mt-0.5">Resets Every 24 Hours • 12 Countries</p>
+        </div>
+
+        <div class="rounded-2xl bg-[#13221c] border border-[#16c784]/40 p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-full bg-[#16c784]/20 border border-[#16c784] flex items-center justify-center font-bold text-xs text-[#16c784]">
+              YOU
+            </div>
+            <div>
+              <div id="lbUserRankBadge" class="text-xs font-mono font-bold text-white">Rank #-- • #103393</div>
+              <div class="text-[11px] text-emerald-300">Your 24h Live Profit / Loss</div>
+            </div>
+          </div>
+          <div id="lbUserPnlText" class="text-sm font-mono font-extrabold text-[#16c784]">+$0.00</div>
+        </div>
+
+        <div id="leaderboardRows" class="space-y-2"></div>
+      </section>
+
+<!-- VIEW 5: PROFILE, VERIFICATION PHOTO & PERSONAL DETAILS -->
+      <section id="view-profile" class="hidden p-4 space-y-4 pb-8">
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] overflow-hidden">
+          <div id="profileCoverBanner" class="h-20 bg-gradient-to-r from-[#0e241b] via-[#131a26] to-[#0f1724] relative flex items-end justify-end p-2">
+            <label class="cursor-pointer px-2.5 py-1 rounded-lg bg-black/60 hover:bg-black/80 border border-white/15 text-[10px] font-semibold text-white">
+              📷 Cover Photo
+              <input type="file" accept="image/*" onchange="handleCoverPhotoUpload(event)" class="hidden" />
+            </label>
+          </div>
+
+          <div class="p-4 -mt-6 flex items-end justify-between gap-2">
+            <div class="flex items-end gap-3">
+              <div class="relative">
+                <div id="profileAvatarBox" class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#16c784] to-emerald-950 p-0.5 shadow-lg">
+                  <div id="profileAvatarInner" class="w-full h-full rounded-[14px] bg-[#11151c] flex items-center justify-center text-lg font-extrabold text-white overflow-hidden">
+                    CP
+                  </div>
+                </div>
+                <span id="profileVerifyBadgeDot" class="w-5 h-5 rounded-full bg-[#ea3943] text-white text-[11px] font-bold flex items-center justify-center absolute -bottom-1 -right-1 border-2 border-[#151921]">✕</span>
+              </div>
+
+              <div class="pt-6">
+                <div id="profileEmailDisplay" class="text-xs font-bold text-white break-all">trader@gmail.com</div>
+                <div id="profilePhoneDisplay" class="text-[11px] font-mono text-gray-400">01700000000</div>
+                <span id="profileVerifyStatusPill" class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/40 text-[10px] font-bold text-red-400">
+                  ✕ Unverified
+                </span>
+              </div>
+            </div>
+
+            <button type="button" onclick="openVerificationModal()" class="px-3 py-2 rounded-xl bg-[#16c784] hover:bg-[#14b476] text-[#06110c] font-bold text-xs shrink-0">
+              Verify Now
+            </button>
+          </div>
+        </div>
+
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 space-y-2 text-xs">
+          <div class="flex items-center justify-between py-1 border-b border-[#1f2633]">
+            <span class="text-gray-400">User ID</span>
+            <span id="profileUidRow" class="font-mono font-bold text-white">103393</span>
+          </div>
+          <div class="flex items-center justify-between py-1 border-b border-[#1f2633]">
+            <span class="text-gray-400">Total Deposited</span>
+            <span id="profileTotalDepositedRow" class="font-mono font-bold text-emerald-300">$0.00</span>
+          </div>
+          <div class="flex items-center justify-between py-1">
+            <span class="text-gray-400">Turnover Completed</span>
+            <span id="profileTurnoverRow" class="font-mono font-bold text-amber-300">$0.00</span>
+          </div>
+        </div>
+
+        <form onsubmit="savePersonalDetails(event)" class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-gray-400">Personal Details</div>
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-400 mb-1">NICKNAME</label>
+            <input id="pdNickname" type="text" placeholder="Nickname" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-400 mb-1">FIRST NAME</label>
+
+<input id="pdFirstName" type="text" placeholder="First name" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-gray-400 mb-1">LAST NAME</label>
+              <input id="pdLastName" type="text" placeholder="Last name" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-400 mb-1">DATE OF BIRTH</label>
+            <input id="pdDob" type="date" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-gray-400 mb-1">COUNTRY</label>
+            <input id="pdCountry" type="text" placeholder="Bangladesh" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+          </div>
+          <button type="submit" class="w-full py-3 rounded-xl bg-[#16c784] hover:bg-[#14b476] text-[#06110c] font-extrabold text-sm transition">
+            ✓ Save Changes
+          </button>
+        </form>
+
+        <button type="button" onclick="logoutAccount()" class="w-full py-2.5 rounded-xl bg-[#1b202b] hover:bg-red-950/50 border border-[#2a3242] text-xs font-bold text-red-400 transition">
+          Log Out
+        </button>
+      </section>
+
+      <!-- VIEW 6: HISTORY BOX (DEPOSITS, WITHDRAWALS & 24H TRADES) -->
+      <section id="view-history" class="hidden p-4 space-y-4 pb-8">
+        <div class="rounded-2xl bg-[#151921] border border-[#232a38] p-4 flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-extrabold text-white">Transaction & Trade History</h2>
+            <p class="text-[11px] text-gray-400">All deposits, withdrawals & trades</p>
+          </div>
+          <button type="button" onclick="switchTab('chart')" class="text-xs font-semibold text-[#16c784]">Chart →</button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1.5 bg-[#0d1016] p-1 rounded-xl border border-[#222938] text-xs font-bold">
+          <button type="button" id="histTabDeposits" onclick="setHistorySubTab('deposits')" class="py-2 rounded-lg bg-[#16c784] text-[#06110c]">Deposits</button>
+          <button type="button" id="histTabWithdrawals" onclick="setHistorySubTab('withdrawals')" class="py-2 rounded-lg text-gray-400">Withdrawals</button>
+          <button type="button" id="histTabTrades" onclick="setHistorySubTab('trades')" class="py-2 rounded-lg text-gray-400">Trades</button>
+        </div>
+
+        <div id="fullHistoryList" class="space-y-2"></div>
+      </section>
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR -->
+    <nav class="h-16 bg-[#12161d] border-t border-[#1f2633] grid grid-cols-5 items-center px-1 shrink-0 z-20">
+      <button type="button" data-tab="home" onclick="switchTab('home')" class="nav-tab flex flex-col items-center justify-center py-1 text-gray-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z" />
+        </svg>
+        <span class="text-[10px] font-semibold mt-0.5">Home</span>
+      </button>
+
+      <button type="button" data-tab="chart" onclick="switchTab('chart')" class="nav-tab flex flex-col items-center justify-center py-1 text-[#16c784]">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" d="M7 20V10m5 10V4m5 16v-7" />
+        </svg>
+        <span class="text-[10px] font-bold mt-0.5">Trade</span>
+      </button>
+
+<button type="button" data-tab="settings" onclick="switchTab('settings')" class="nav-tab flex flex-col items-center justify-center py-1 text-gray-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <circle cx="12" cy="12" r="3" />
+        </svg>
+        <span class="text-[10px] font-semibold mt-0.5">Settings</span>
+      </button>
+
+      <button type="button" data-tab="leaderboard" onclick="switchTab('leaderboard')" class="nav-tab flex flex-col items-center justify-center py-1 text-gray-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 21h8m-4-4v4m-5-9a5 5 0 01-5-5V5h5m10 7a5 5 0 005-5V5h-5M7 5h10v5a5 5 0 01-10 0V5z" />
+        </svg>
+        <span class="text-[10px] font-semibold mt-0.5">Top</span>
+      </button>
+
+      <button type="button" data-tab="profile" onclick="switchTab('profile')" class="nav-tab flex flex-col items-center justify-center py-1 text-gray-400 hover:text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+        <span class="text-[10px] font-semibold mt-0.5">Profile</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODAL BACKDROP -->
+  <div id="modalBackdrop" class="hidden fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
+
+    <!-- A. DEPOSIT MODAL -->
+    <div id="depositModal" class="hidden w-full max-w-md rounded-2xl bg-[#141820] border border-[#273041] p-4 space-y-3.5 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#222938] pb-2.5">
+        <h3 class="text-sm font-extrabold text-white">Deposit Funds</h3>
+        <button type="button" onclick="closeAllModals()" class="text-gray-400 hover:text-white text-sm px-2">✕</button>
+      </div>
+
+      <div id="depositStep1" class="space-y-3">
+        <p id="depositMinBanner" class="text-xs text-emerald-300 bg-[#0e1218] p-2.5 rounded-xl border border-[#222938]">
+          Minimum Deposit: $1 (USD) or ৳120 (BDT). Promo code adds +30% bonus.
+        </p>
+        <div class="grid grid-cols-2 gap-3">
+          <button type="button" onclick="openDepositGateway('bKash')" class="p-4 rounded-2xl bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/40 flex flex-col items-center gap-2 transition">
+            <span class="w-10 h-10 rounded-xl bg-pink-600 text-white font-extrabold flex items-center justify-center text-sm">bK</span>
+            <span class="text-sm font-bold text-pink-300">bKash</span>
+            <span class="text-[10px] text-gray-400">Send Money</span>
+          </button>
+
+          <button type="button" onclick="openDepositGateway('Nagad')" class="p-4 rounded-2xl bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/40 flex flex-col items-center gap-2 transition">
+            <span class="w-10 h-10 rounded-xl bg-orange-600 text-white font-extrabold flex items-center justify-center text-sm">NG</span>
+            <span class="text-sm font-bold text-orange-300">Nagad</span>
+            <span class="text-[10px] text-gray-400">Send Money</span>
+          </button>
+        </div>
+      </div>
+
+<form id="depositStep2" onsubmit="submitDepositRequest(event)" class="hidden space-y-3">
+        <div class="flex items-center justify-between bg-[#0e1218] p-2.5 rounded-xl border border-[#242c3b]">
+          <div>
+            <div class="text-[10px] uppercase text-gray-400">Method</div>
+            <div id="depositGatewayMethodLabel" class="text-sm font-extrabold text-[#16c784]">bKash Send Money</div>
+          </div>
+          <button type="button" onclick="backToDepositMethod()" class="text-xs text-sky-400 underline">Change</button>
+        </div>
+
+        <div class="p-3 rounded-xl bg-[#191f2b] border border-[#2b3446] flex items-center justify-between">
+          <div>
+            <div class="text-[11px] text-gray-400">Send Money Number</div>
+            <div class="text-base font-mono font-extrabold text-white tracking-wider">01750510914</div>
+          </div>
+          <button type="button" onclick="copyTextValue('01750510914', 'Copied 01750510914!')" class="px-3 py-1.5 rounded-lg bg-[#16c784] text-[#06110c] font-bold text-xs">
+            Copy
+          </button>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-red-950/50 border border-red-500/50 text-[11px] text-red-200 leading-relaxed">
+          ⚠️ WhatsApp (01750510914)-এ ডিপোজিট প্রমাণ পাঠান, নইলে কনফার্ম ও উইথড্রতে সমস্যা হতে পারে।
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label id="depositAmountLabel" class="block text-xs font-semibold text-gray-300 mb-1">Amount (Min $1)</label>
+            <input id="depositAmountInput" type="number" min="1" step="any" required placeholder="e.g. 120"
+              class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Promo Code</label>
+            <input id="depositPromoInput" type="text" placeholder="Optional"
+              class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-emerald-300" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Sender Number</label>
+            <input id="depositSenderNumber" type="text" required placeholder="017XXXXXXXX"
+              class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Transaction ID</label>
+            <input id="depositTrxId" type="text" required placeholder="TRX12345"
+              class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-white" />
+          </div>
+        </div>
+
+        <label class="flex items-center gap-2 text-[11px] text-gray-300 cursor-pointer">
+          <input id="fastCreditSimToggle" type="checkbox" checked class="accent-[#16c784]" />
+          <span>Fast preview credit (10s) for instant testing</span>
+        </label>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-[#16c784] hover:bg-[#14b476] text-[#06110c] font-extrabold text-sm">
+          Confirm Deposit & Open WhatsApp
+        </button>
+      </form>
+    </div>
+
+    <!-- B. WITHDRAW MODAL (WITH 40% FEE, TIER & TURNOVER CHECKS) -->
+    <div id="withdrawModal" class="hidden w-full max-w-md rounded-2xl bg-[#141820] border border-[#273041] p-4 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#222938] pb-2.5">
+        <h3 class="text-sm font-extrabold text-white">Withdraw Funds</h3>
+        <button type="button" onclick="closeAllModals()" class="text-gray-400 hover:text-white text-sm px-2">✕</button>
+      </div>
+
+      <div id="withdrawRulesSummaryBox" class="p-3 rounded-xl bg-[#0e1218] border border-[#252e3f] text-[11px] space-y-1 text-gray-300"></div>
+
+<div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/40 text-[11px] text-amber-200 leading-relaxed">
+        🎥 উইথড্রতে কোনো সমস্যা হলে ভিডিও করে WhatsApp <strong>01750510914</strong>-এ পাঠান। Withdrawals apply a <strong>40% processing deduction</strong>.
+      </div>
+
+      <form onsubmit="submitWithdrawRequest(event)" class="space-y-2.5">
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Payment Method</label>
+          <select id="withdrawMethod" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white">
+            <option value="bKash">bKash</option>
+            <option value="Nagad">Nagad</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Account Number</label>
+          <input id="withdrawAccount" type="tel" required placeholder="017XXXXXXXX"
+            class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-white" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Withdraw Amount</label>
+          <input id="withdrawAmount" type="number" min="1" step="any" required oninput="updateWithdrawFeePreview()" placeholder="Enter amount"
+            class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-white" />
+          <div id="withdrawFeePreview" class="text-[11px] font-mono text-amber-300 mt-1">40% fee: 0.00 • Net payout: 0.00</div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-[#16c784] hover:bg-[#14b476] text-[#06110c] font-extrabold text-sm">
+          Submit Withdrawal
+        </button>
+      </form>
+    </div>
+
+    <!-- C. VERIFICATION MODAL (WITH PHOTO UPLOAD) -->
+    <div id="verifyModal" class="hidden w-full max-w-md rounded-2xl bg-[#141820] border border-[#273041] p-4 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#222938] pb-2.5">
+        <h3 class="text-sm font-extrabold text-white">Account Verification</h3>
+        <button type="button" onclick="closeAllModals()" class="text-gray-400 hover:text-white text-sm px-2">✕</button>
+      </div>
+
+      <form onsubmit="submitVerificationForm(event)" class="space-y-2.5">
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Country</label>
+            <input id="verCountry" type="text" required value="Bangladesh" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">District</label>
+            <input id="verDistrict" type="text" required placeholder="Dhaka" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Age (18+)</label>
+            <input id="verAge" type="number" min="1" max="110" required placeholder="21" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-white" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Date of Birth</label>
+            <input id="verDob" type="date" required class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Mobile Number</label>
+          <input id="verMobile" type="tel" required placeholder="017XXXXXXXX" class="w-full px-3 py-2 rounded-xl bg-[#0e1218] border border-[#252d3c] text-sm font-mono text-white" />
+        </div>
+
+<div>
+          <label class="block text-xs font-semibold text-gray-300 mb-1">Verification Photo (Optional)</label>
+          <div class="flex items-center gap-3">
+            <label class="flex-1 cursor-pointer py-2 px-3 rounded-xl bg-[#0e1218] border border-dashed border-[#2e384c] text-xs text-emerald-300 text-center">
+              <span>📸 Choose Photo</span>
+              <input id="verPhotoInput" type="file" accept="image/*" onchange="handleVerifyPhotoUpload(event)" class="hidden" />
+            </label>
+            <img id="verPhotoPreviewImg" alt="Preview" class="hidden w-11 h-11 rounded-xl object-cover border border-[#16c784]" />
+          </div>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-[#16c784] hover:bg-[#14b476] text-[#06110c] font-extrabold text-sm">
+          Verify Now & Message WhatsApp
+        </button>
+      </form>
+    </div>
+
+    <!-- D. PAIR PICKER MODAL -->
+    <div id="pairPickerModal" class="hidden w-full max-w-md rounded-2xl bg-[#141820] border border-[#273041] p-4 space-y-3 max-h-[82vh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-[#222938] pb-2.5">
+        <h3 class="text-sm font-extrabold text-white">Select Market Pair</h3>
+        <button type="button" onclick="closeAllModals()" class="text-gray-400 hover:text-white text-sm px-2">✕</button>
+      </div>
+      <div id="modalMarketList" class="overflow-y-auto space-y-2 pr-1"></div>
+    </div>
+
+    <!-- E. INFO / INVITE FRIENDS / RULES MODAL -->
+    <div id="infoModal" class="hidden w-full max-w-md rounded-2xl bg-[#141820] border border-[#273041] p-4 space-y-3 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#222938] pb-2.5">
+        <h3 id="infoModalTitle" class="text-sm font-extrabold text-white">Info</h3>
+        <button type="button" onclick="closeAllModals()" class="text-gray-400 hover:text-white text-sm px-2">✕</button>
+      </div>
+      <div id="infoModalBody" class="space-y-2.5 text-xs text-gray-300"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'cortek_pro_master_v2';
+    const REGISTRY_KEY = 'cortek_pro_registered_users_v2';
+    const SESSION_DURATION_MS = 60 * 24 * 60 * 60 * 1000;
+    const WHATSAPP_NUMBER = '8801750510914';
+    const BDT_PER_USD = 120;
+
+    // 50 Real World Languages
+    const WORLD_LANGUAGES = [
+      { code: 'en', name: 'English', sample: 'Trade UP or DOWN with synchronized live candles.' },
+      { code: 'bn', name: 'বাংলা (Bengali)', sample: 'সিনক্রোনাইজড লাইভ ক্যান্ডেলে ট্রেড করুন এবং নিয়ম মেনে উইথড্র দিন।' },
+      { code: 'hi', name: 'हिन्दी (Hindi)', sample: 'सिंक्रनाइज़्ड लाइव कैंडल के साथ ट्रेड करें।' },
+      { code: 'es', name: 'Español (Spanish)', sample: 'Opera con velas sincronizadas en tiempo real.' },
+      { code: 'ar', name: 'العربية (Arabic)', sample: 'تداول مع الشموع المتزامنة في الوقت الفعلي.' },
+      { code: 'id', name: 'Bahasa Indonesia', sample: 'Trading dengan candle tersinkronisasi secara langsung.' },
+      { code: 'ms', name: 'Bahasa Melayu', sample: 'Berdagang dengan lilin tersegerak masa nyata.' },
+      { code: 'pt', name: 'Português (Portuguese)', sample: 'Opere com velas sincronizadas em tempo real.' },
+      { code: 'tr', name: 'Türkçe (Turkish)', sample: 'Senkronize canlı mumlarla işlem yapın.' },
+      { code: 'fr', name: 'Français (French)', sample: 'Tradez avec des bougies synchronisées en direct.' },
+      { code: 'de', name: 'Deutsch (German)', sample: 'Handeln Sie mit synchronisierten Live-Kerzen.' },
+      { code: 'ru', name: 'Русский (Russian)', sample: 'Торгуйте на синхронизированных свечах в реальном времени.' },
+      { code: 'ja', name: '日本語 (Japanese)', sample: '同期されたライブローソク足で取引します。' },
+      { code: 'ko', name: '한국어 (Korean)', sample: '동기화된 실시간 캔들로 거래하세요.' },
+
+{ code: 'zh', name: '中文 (Chinese)', sample: '使用同步实时K线进行交易。' },
+      { code: 'ur', name: 'اردو (Urdu)', sample: 'لائیو کینڈلز کے ساتھ ٹریڈنگ کریں۔' },
+      { code: 'fa', name: 'فارسی (Persian)', sample: 'معامله با کندل‌های همگام‌سازی شده زنده.' },
+      { code: 'vi', name: 'Tiếng Việt (Vietnamese)', sample: 'Giao dịch với nến trực tiếp đồng bộ.' },
+      { code: 'th', name: 'ไทย (Thai)', sample: 'เทรดด้วยแท่งเทียนแบบซิงโครไนซ์สด' },
+      { code: 'it', name: 'Italiano (Italian)', sample: 'Fai trading con candele sincronizzate dal vivo.' },
+      { code: 'nl', name: 'Nederlands (Dutch)', sample: 'Handel met live gesynchroniseerde kaarsen.' },
+      { code: 'pl', name: 'Polski (Polish)', sample: 'Handluj na zsynchronizowanych świecach na żywo.' },
+      { code: 'uk', name: 'Українська (Ukrainian)', sample: 'Торгуйте із синхронізованими свічками.' },
+      { code: 'ro', name: 'Română (Romanian)', sample: 'Tranzacționează cu lumânări sincronizate.' },
+      { code: 'el', name: 'Ελληνικά (Greek)', sample: 'Συναλλαγές με συγχρονισμένα κεριά.' },
+      { code: 'sw', name: 'Kiswahili (Swahili)', sample: 'Fanya biashara na mishumaa iliyosawazishwa.' },
+      { code: 'am', name: 'አማርኛ (Amharic)', sample: 'በተመሳሳይ የቀጥታ ሻማዎች ይገበያዩ።' },
+      { code: 'ta', name: 'தமிழ் (Tamil)', sample: 'நேரடி மெழுகுவர்த்திகளுடன் வர்த்தகம் செய்யுங்கள்.' },
+      { code: 'te', name: 'తెలుగు (Telugu)', sample: 'లైవ్ క్యాండిల్స్‌తో ట్రేడింగ్ చేయండి.' },
+      { code: 'mr', name: 'मराठी (Marathi)', sample: 'लाइव्ह कँडल्ससह ट्रेडिंग करा.' },
+      { code: 'gu', name: 'ગુજરાતી (Gujarati)', sample: 'લાઈવ કેન્ડલ્સ સાથે ટ્રેડિંગ કરો.' },
+      { code: 'pa', name: 'ਪੰਜਾਬੀ (Punjabi)', sample: 'ਲਾਈਵ ਕੈਂਡਲਾਂ ਨਾਲ ਵਪਾਰ ਕਰੋ।' },
+      { code: 'ne', name: 'नेपाली (Nepali)', sample: 'लाइभ क्यान्डलहरूसँग ट्रेड गर्नुहोस्।' },
+      { code: 'si', name: 'සිංහල (Sinhala)', sample: 'සජීවී ඉටිපන්දම් සමඟ වෙළඳාම් කරන්න.' },
+      { code: 'my', name: 'မြန်မာ (Burmese)', sample: 'တိုက်ရိုက်ဖယောင်းတိုင်များဖြင့် ကုန်သွယ်ပါ။' },
+      { code: 'km', name: 'ខ្មែរ (Khmer)', sample: 'ជួញដូរជាមួយជើងទៀនផ្សាយផ្ទាល់។' },
+      { code: 'fil', name: 'Filipino (Tagalog)', sample: 'Mag-trade gamit ang live candles.' },
+      { code: 'sv', name: 'Svenska (Swedish)', sample: 'Handla med synkroniserade levande ljus.' },
+      { code: 'no', name: 'Norsk (Norwegian)', sample: 'Handle med synkroniserte levende lys.' },
+      { code: 'da', name: 'Dansk (Danish)', sample: 'Handl med synkroniserede levende lys.' },
+      { code: 'fi', name: 'Suomi (Finnish)', sample: 'Käy kauppaa synkronoiduilla kynttilöillä.' },
+      { code: 'cs', name: 'Čeština (Czech)', sample: 'Obchodujte se synchronizovanými svíčkami.' },
+      { code: 'hu', name: 'Magyar (Hungarian)', sample: 'Kereskedjen szinkronizált gyertyákkal.' },
+      { code: 'he', name: 'עברית (Hebrew)', sample: 'סחר עם נרות חיים מסונכרנים.' },
+      { code: 'az', name: 'Azərbaycan (Azerbaijani)', sample: 'Sinxronlaşdırılmış şamlarla ticarət edin.' },
+      { code: 'uz', name: 'Oʻzbek (Uzbek)', sample: 'Sinxronlashtirilgan shamlar bilan savdo qiling.' },
+      { code: 'kk', name: 'Қазақ (Kazakh)', sample: 'Үйлестірілген шамдармен сауда жасаңыз.' },
+      { code: 'sr', name: 'Српски (Serbian)', sample: 'Тргујте са синхронизованим свећама.' },
+      { code: 'hr', name: 'Hrvatski (Croatian)', sample: 'Trgujte sa sinkroniziranim svijećama.' },
+      { code: 'sk', name: 'Slovenčina (Slovak)', sample: 'Obchodujte so synchronizovanými sviečkami.' },
+    ];
+
+    const TRADE_DURATIONS = [
+      { sec: 5, label: '5s' },
+      { sec: 15, label: '15s' },
+      { sec: 30, label: '30s' },
+      { sec: 60, label: '1m' },
+      { sec: 120, label: '2m' },
+      { sec: 180, label: '3m' },
+      { sec: 300, label: '5m' },
+    ];
+
+    const MARKET_PAIRS = [
+      { id: 'EURUSD', name: 'EUR/USD', type: 'REAL', flags: '🇪🇺🇺🇸', payout: 88, change: -0.55, price: 1.08420 },
+
+{ id: 'GBPUSD', name: 'GBP/USD', type: 'REAL', flags: '🇬🇧🇺🇸', payout: 86, change: -0.43, price: 1.26710 },
+      { id: 'USDJPY', name: 'USD/JPY', type: 'REAL', flags: '🇺🇸🇯🇵', payout: 85, change: 0.31, price: 154.320 },
+      { id: 'AUDUSD', name: 'AUD/USD', type: 'REAL', flags: '🇦🇺🇺🇸', payout: 84, change: -0.23, price: 0.65480 },
+      { id: 'USDCAD', name: 'USD/CAD', type: 'REAL', flags: '🇺🇸🇨🇦', payout: 82, change: 0.14, price: 1.38940 },
+      { id: 'USDCHF', name: 'USD/CHF', type: 'REAL', flags: '🇺🇸🇨🇭', payout: 83, change: 0.89, price: 0.88190 },
+      { id: 'EURJPY', name: 'EUR/JPY', type: 'REAL', flags: '🇪🇺🇯🇵', payout: 87, change: 0.61, price: 167.290 },
+      { id: 'EURGBP', name: 'EUR/GBP', type: 'REAL', flags: '🇪🇺🇬🇧', payout: 80, change: -0.12, price: 0.85570 },
+      { id: 'AUDJPY', name: 'AUD/JPY', type: 'REAL', flags: '🇦🇺🇯🇵', payout: 88, change: 0.07, price: 101.050 },
+      { id: 'BTCUSD', name: 'BTC/USD', type: 'REAL', flags: '🪙🇺🇸', payout: 85, change: 1.42, price: 89420.50 },
+      { id: 'EURUSD_OTC', name: 'EUR/USD OTC', type: 'OTC', flags: '🇪🇺🇺🇸', payout: 92, change: 0.44, price: 1.08590 },
+      { id: 'GBPUSD_OTC', name: 'GBP/USD OTC', type: 'OTC', flags: '🇬🇧🇺🇸', payout: 91, change: -0.19, price: 1.26940 },
+      { id: 'EURAUD_OTC', name: 'EUR/AUD OTC', type: 'OTC', flags: '🇪🇺🇦🇺', payout: 92, change: -0.34, price: 1.70049 },
+      { id: 'USDCOP_OTC', name: 'USD/COP (OTC)', type: 'OTC', flags: '🇺🇸🇨🇴', payout: 90, change: 1.95, price: 4215.40 },
+      { id: 'USDBDT_OTC', name: 'USD/BDT OTC', type: 'OTC', flags: '🇺🇸🇧🇩', payout: 93, change: 0.28, price: 119.650 },
+      { id: 'AUDCAD_OTC', name: 'AUD/CAD OTC', type: 'OTC', flags: '🇦🇺🇨🇦', payout: 89, change: 0.52, price: 0.90980 },
+      { id: 'NZDUSD_OTC', name: 'NZD/USD OTC', type: 'OTC', flags: '🇳🇿🇺🇸', payout: 88, change: -0.08, price: 0.59410 },
+      { id: 'GBPCHF_OTC', name: 'GBP/CHF OTC', type: 'OTC', flags: '🇬🇧🇨🇭', payout: 90, change: 0.37, price: 1.11730 },
+      { id: 'EURCHF_OTC', name: 'EUR/CHF OTC', type: 'OTC', flags: '🇪🇺🇨🇭', payout: 87, change: -0.21, price: 0.95620 },
+      { id: 'XAUUSD_OTC', name: 'GOLD OTC', type: 'OTC', flags: '🥇🇺🇸', payout: 92, change: 0.76, price: 2684.30 },
+    ];
+
+    // 12 Countries Leaderboard Pool
+    const LEADERBOARD_POOL = [
+      { name: 'Ashiqur', country: 'Bangladesh', flag: '🇧🇩', basePnl: 10000.00 },
+      { name: 'Mostafa Kamal', country: 'Egypt', flag: '🇪🇬', basePnl: 9420.50 },
+      { name: 'Ayu Wijaya', country: 'Indonesia', flag: '🇮🇩', basePnl: 8890.25 },
+      { name: 'Jorge', country: 'Mexico', flag: '🇲🇽', basePnl: 8377.56 },
+      { name: 'Manish Pillai', country: 'India', flag: '🇮🇳', basePnl: 8295.92 },
+      { name: 'Rico Dela Cruz', country: 'Philippines', flag: '🇵🇭', basePnl: 7814.20 },
+      { name: 'Funmi Nwosu', country: 'Nigeria', flag: '🇳🇬', basePnl: 7690.59 },
+      { name: 'Juliana', country: 'Brazil', flag: '🇧🇷', basePnl: 7424.75 },
+      { name: 'Tariq Mahmood', country: 'Pakistan', flag: '🇵🇰', basePnl: 6371.22 },
+      { name: 'Lucas Meyer', country: 'Germany', flag: '🇩🇪', basePnl: 5968.35 },
+      { name: 'Kenji Sato', country: 'Japan', flag: '🇯🇵', basePnl: 5480.00 },
+      { name: 'Sofia Rossi', country: 'Italy', flag: '🇮🇹', basePnl: 4881.88 },
+    ];
+
+    // 10 Indicators + Trendline + Horizontal Line
+    const INDICATOR_OPTIONS = [
+      { id: 'EMA', label: '1. EMA (14)' },
+      { id: 'SMA', label: '2. SMA (20)' },
+      { id: 'BOLL', label: '3. Bollinger Bands' },
+      { id: 'RSI', label: '4. RSI (14)' },
+      { id: 'MACD', label: '5. MACD' },
+      { id: 'ATR', label: '6. ATR (14)' },
+      { id: 'VWAP', label: '7. VWAP' },
+      { id: 'STOCH', label: '8. Stochastic' },
+      { id: 'TRENDLINE', label: '9. Trendline' },
+      { id: 'HLINE', label: '10. Horizontal Line' },
+    ];
+
+    const UP_COLORS = ['#16c784', '#10b981', '#0ea5e9', '#2dd4bf', '#f8fafc'];
+    const DOWN_COLORS = ['#ea3943', '#f97316', '#f59e0b', '#d946ef', '#475569'];
+
+// Web Audio Synthesizer (Zero External Audio Files)
+    let audioCtx = null;
+    function playSoundCue(type) {
+      try {
+        if (!audioCtx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) audioCtx = new AC();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+
+        const now = audioCtx.currentTime;
+        if (type === 'trade') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(780, now + 0.09);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.12);
+        } else if (type === 'win') {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            const t = now + idx * 0.085;
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.14, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.24);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.25);
+          });
+        } else if (type === 'loss') {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(280, now);
+          osc.frequency.exponentialRampToValueAtTime(140, now + 0.28);
+          gain.gain.setValueAtTime(0.11, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.31);
+        } else if (type === 'refund') {
+          [440, 440].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            const t = now + idx * 0.12;
+            osc.frequency.setValueAtTime(freq, t);
+            gain.gain.setValueAtTime(0.09, t);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(t);
+            osc.stop(t + 0.11);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function createDefaultState() {
+      return {
+        auth: {
+          isLoggedIn: false,
+          email: 'trader@gmail.com',
+          phone: '01700000000',
+          uid: '103393',
+          language: 'en',
+          currency: 'USD',
+          expiresAt: 0,
+        },
+        balances: {
+          live: 0.00,
+          demo: 10000.00,
+          activeMode: 'live',
+          totalDeposited: 0.00,
+          turnoverCompleted: 0.00,
+          isBlocked: false,
+          blockBaseline: 0.00,
+        },
+        verification: {
+          verified: false,
+          country: 'Bangladesh',
+          district: '',
+          age: '',
+          dob: '',
+          mobile: '',
+          photoDataUrl: '',
+          coverDataUrl: '',
+        },
+        profile: {
+          nickname: '',
+          firstName: '',
+          lastName: '',
+          dob: '',
+          country: 'Bangladesh',
+        },
+        settings: {
+          gridOpacity: 10,
+          upColor: '#16c784',
+          downColor: '#ea3943',
+          bgPreset: 0,
+          customBgUrl: '',
+          candleStyle: 'STANDARD',
+          activeIndicators: [],
+        },
+        favorites: ['EURUSD', 'GBPUSD', 'EURAUD_OTC', 'USDCOP_OTC'],
+
+selectedPairId: 'EURAUD_OTC',
+        timeframeSec: 60,
+        tradeDurationSec: 15,
+        livePnl24h: 0.00,
+        invitedCount: 0,
+        trades: [],
+        deposits: [],
+        withdrawals: [],
+        notifications: [
+          { id: 1, title: 'Welcome to Cortek Pro', text: 'Synchronized candles, 10 indicators, 3 candle styles, and 50 languages active.', time: 'Now' },
+        ],
+      };
+    }
+
+    let state = loadState();
+    let currentGeneratedAuthCode = '';
+    let selectedAuthCurrency = 'USD';
+    let currentDepositMethod = 'bKash';
+    let marketFilter = 'ALL';
+    let historySubTab = 'deposits';
+    let activeTab = 'chart';
+    let activeTrades = [];
+
+    let candles = [];
+    let lastProcessedSec = 0;
+    let zoomLevel = 1.0;
+    let panOffsetCandles = 0;
+    let isDraggingChart = false;
+    let dragStartX = 0;
+    let dragStartPan = 0;
+    let pinchStartDist = null;
+    let pinchStartZoom = 1;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createDefaultState();
+        const p = JSON.parse(raw);
+        const def = createDefaultState();
+        return {
+          ...def,
+          ...p,
+          auth: { ...def.auth, ...(p.auth || {}) },
+          balances: { ...def.balances, ...(p.balances || {}) },
+          verification: { ...def.verification, ...(p.verification || {}) },
+          profile: { ...def.profile, ...(p.profile || {}) },
+          settings: { ...def.settings, ...(p.settings || {}) },
+        };
+      } catch (e) {
+        return createDefaultState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadRegistry() {
+      try {
+        return JSON.parse(localStorage.getItem(REGISTRY_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRegistry(list) {
+      try {
+        localStorage.setItem(REGISTRY_KEY, JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      const colors = {
+        success: 'bg-[#12261e] border-[#16c784] text-emerald-200',
+        error: 'bg-[#2a1216] border-[#ea3943] text-red-200',
+        info: 'bg-[#151b26] border-sky-500/60 text-sky-100',
+      };
+      el.className = toast-enter px-4 py-3 rounded-xl border shadow-xl text-xs font-semibold ${colors[type] || colors.info};
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => el.remove(), 260);
+      }, 3200);
+    }
+
+    function formatMoney(amount) {
+      const num = Number(amount) || 0;
+      if (state.auth.currency === 'BDT') {
+        return '৳' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function getMinTradeAmount() {
+      return state.auth.currency === 'BDT' ? 30 : 1;
+    }
+
+    function getMinDepositAmount() {
+      return state.auth.currency === 'BDT' ? 120 : 1;
+    }
+
+    function formatDurationLabel(sec) {
+      const found = TRADE_DURATIONS.find((d) => d.sec === Number(sec));
+      if (found) return found.label;
+      if (sec < 60) return ${sec}s;
+      const m = Math.floor(sec / 60);
+      const r = sec % 60;
+      return r ? ${m}m ${r}s : ${m}m;
+    }
+
+    // 50 LANGUAGES
+    function populateLanguageSelectors() {
+      const authSel = document.getElementById('authLangSelect');
+      const setSel = document.getElementById('settingsLangSelect');
+
+const optionsHtml = WORLD_LANGUAGES.map((l) => <option value="${l.code}">${l.name}</option>).join('');
+      if (authSel) authSel.innerHTML = optionsHtml;
+      if (setSel) setSel.innerHTML = optionsHtml;
+      setAppLanguage(state.auth.language || 'en', false);
+    }
+
+    function setAppLanguage(code, shouldSave = true) {
+      const langObj = WORLD_LANGUAGES.find((l) => l.code === code) || WORLD_LANGUAGES[0];
+      state.auth.language = langObj.code;
+      if (shouldSave) saveState();
+
+      const authSel = document.getElementById('authLangSelect');
+      const setSel = document.getElementById('settingsLangSelect');
+      if (authSel) authSel.value = langObj.code;
+      if (setSel) setSel.value = langObj.code;
+
+      const badge = document.getElementById('activeLangCodeBadge');
+      if (badge) badge.textContent = langObj.code.toUpperCase();
+
+      const sample = document.getElementById('translatedSampleBanner');
+      if (sample) sample.textContent = ${langObj.name}: ${langObj.sample};
+
+      document.documentElement.dir = langObj.code === 'ar'  langObj.code === 'he'  langObj.code === 'ur' || langObj.code === 'fa' ? 'rtl' : 'ltr';
+    }
+
+    // 5-SECOND PRELOADER
+    function runPreloader(onComplete) {
+      const screen = document.getElementById('preloaderScreen');
+      const bar = document.getElementById('preloaderBar');
+      const timerText = document.getElementById('preloaderTimerText');
+      const totalMs = 5000;
+      const start = Date.now();
+
+      const interval = setInterval(() => {
+        const elapsed = Date.now() - start;
+        const pct = Math.min(100, (elapsed / totalMs) * 100);
+        const remSec = Math.max(0, Math.ceil((totalMs - elapsed) / 1000));
+        bar.style.width = pct + '%';
+        timerText.textContent = Initializing terminal... ${remSec}s;
+
+        if (elapsed >= totalMs) {
+          clearInterval(interval);
+          screen.classList.add('hidden');
+          onComplete();
+        }
+      }, 100);
+    }
+
+    // UNIQUE EMAIL + PHONE REGISTRATION & LOGIN
+    function switchAuthTab(tab) {
+      const loginForm = document.getElementById('loginForm');
+      const regForm = document.getElementById('registerForm');
+      const tabLogin = document.getElementById('tabLoginBtn');
+      const tabReg = document.getElementById('tabRegisterBtn');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        tabLogin.className = 'py-2.5 rounded-xl text-xs font-bold bg-[#16c784] text-[#07120d] transition';
+        tabReg.className = 'py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition';
+      } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabReg.className = 'py-2.5 rounded-xl text-xs font-bold bg-[#16c784] text-[#07120d] transition';
+        tabLogin.className = 'py-2.5 rounded-xl text-xs font-bold text-gray-400 hover:text-white transition';
+        generateDynamicAuthCode();
+      }
+    }
+
+    function selectAuthCurrency(curr) {
+      selectedAuthCurrency = curr;
+      state.auth.currency = curr;
+      const usdBtn = document.getElementById('currUsdBtn');
+      const bdtBtn = document.getElementById('currBdtBtn');
+      if (curr === 'USD') {
+        usdBtn.className = 'py-2 px-3 rounded-xl border border-[#16c784] bg-[#16c784]/15 text-white text-xs font-bold flex items-center justify-center gap-1.5';
+        bdtBtn.className = 'py-2 px-3 rounded-xl border border-[#252c3a] bg-[#0b0e13] text-gray-300 text-xs font-bold flex items-center justify-center gap-1.5';
+      } else {
+        bdtBtn.className = 'py-2 px-3 rounded-xl border border-[#16c784] bg-[#16c784]/15 text-white text-xs font-bold flex items-center justify-center gap-1.5';
+        usdBtn.className = 'py-2 px-3 rounded-xl border border-[#252c3a] bg-[#0b0e13] text-gray-300 text-xs font-bold flex items-center justify-center gap-1.5';
+      }
+      saveState();
+    }
+
+function generateDynamicAuthCode() {
+      currentGeneratedAuthCode = String(Math.floor(100000 + Math.random() * 900000));
+      document.getElementById('generatedCodeDisplay').textContent = currentGeneratedAuthCode;
+      document.getElementById('regCodeInput').value = currentGeneratedAuthCode;
+    }
+
+    function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const phone = document.getElementById('regPhone').value.trim();
+      const pass = document.getElementById('regPassword').value;
+      const confirm = document.getElementById('regConfirmPassword').value;
+      const codeEntered = document.getElementById('regCodeInput').value.trim();
+
+      if (!email || !phone) {
+        showToast('Gmail and Phone number are both required.', 'error');
+        return;
+      }
+      if (pass !== confirm) {
+        showToast('Password and Confirm Password do not match.', 'error');
+        return;
+      }
+      if (!currentGeneratedAuthCode || codeEntered !== currentGeneratedAuthCode) {
+        showToast('Click "Get Code" and enter the generated code.', 'error');
+        return;
+      }
+
+      const registry = loadRegistry();
+      const duplicate = registry.find((u) => u.email === email || u.phone === phone);
+      if (duplicate) {
+        showToast('This Gmail or Phone number is already registered. Please log in instead.', 'error');
+        return;
+      }
+
+      const uid = String(Math.floor(100000 + Math.random() * 900000));
+      const newUser = {
+        uid,
+        email,
+        phone,
+        password: pass,
+        currency: selectedAuthCurrency,
+        createdAt: Date.now(),
+      };
+      registry.push(newUser);
+      saveRegistry(registry);
+
+      state.auth = {
+        ...state.auth,
+        isLoggedIn: true,
+        email,
+        phone,
+        uid,
+        currency: selectedAuthCurrency,
+        expiresAt: Date.now() + SESSION_DURATION_MS,
+      };
+      if (!state.balances.demo || state.balances.demo <= 0) {
+        state.balances.demo = 10000.00;
+      }
+      saveState();
+      enterMainApp();
+      showToast(Registered! Welcome ${email} (${selectedAuthCurrency}), 'success');
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const identifier = document.getElementById('loginIdentifier').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPassword').value;
+
+      const registry = loadRegistry();
+      const matched = registry.find(
+        (u) => (u.email.toLowerCase() === identifier || u.phone.toLowerCase() === identifier) && u.password === pass
+      );
+
+      if (!matched) {
+        showToast('Invalid Gmail/Phone or Password, or account not registered yet.', 'error');
+        return;
+      }
+
+      state.auth = {
+        ...state.auth,
+        isLoggedIn: true,
+        email: matched.email,
+        phone: matched.phone,
+        uid: matched.uid,
+        currency: matched.currency || state.auth.currency,
+        expiresAt: Date.now() + SESSION_DURATION_MS,
+      };
+      saveState();
+      enterMainApp();
+      showToast(Signed in to ${matched.email}, 'success');
+    }
+
+    function logoutAccount() {
+      state.auth.isLoggedIn = false;
+      state.auth.expiresAt = 0;
+      saveState();
+      document.getElementById('appShell').classList.add('hidden');
+      document.getElementById('authScreen').classList.remove('hidden');
+      showToast('Logged out.', 'info');
+    }
+
+    function enterMainApp() {
+      document.getElementById('authScreen').classList.add('hidden');
+      document.getElementById('appShell').classList.remove('hidden');
+      renderIndicatorChecklist();
+      applySettingsToUI();
+      syncTradeDurationUI();
+      syncAllUI();
+      syncCandleClock(true);
+      resizeChartCanvas();
+      switchTab('chart');
+    }
+
+// NAVIGATION & THREE-DOT MENU
+    function switchTab(tabName) {
+      activeTab = tabName;
+      ['home', 'chart', 'settings', 'leaderboard', 'profile', 'history'].forEach((t) => {
+        const el = document.getElementById('view-' + t);
+        if (el) el.classList.toggle('hidden', t !== tabName);
+      });
+
+      document.querySelectorAll('.nav-tab').forEach((btn) => {
+        const isCurrent = btn.dataset.tab === tabName;
+        btn.className = isCurrent
+          ? 'nav-tab flex flex-col items-center justify-center py-1 text-[#16c784]'
+          : 'nav-tab flex flex-col items-center justify-center py-1 text-gray-400 hover:text-white';
+      });
+
+      if (tabName === 'chart') {
+        resizeChartCanvas();
+        syncTradeDurationUI();
+      } else if (tabName === 'leaderboard') {
+        renderLeaderboard();
+      } else if (tabName === 'profile') {
+        syncProfileForm();
+      } else if (tabName === 'home') {
+        renderMarketList();
+      } else if (tabName === 'history') {
+        renderFullHistory();
+      } else if (tabName === 'settings') {
+        updateCurrencyConverter();
+        syncAccountLockBanner();
+      }
+    }
+
+    function toggleThreeDotMenu() {
+      document.getElementById('threeDotDropdown').classList.toggle('hidden');
+    }
+
+    function closeThreeDotMenu() {
+      document.getElementById('threeDotDropdown').classList.add('hidden');
+    }
+
+    // CURRENCY & WALLET SYNC
+    function toggleCurrency() {
+      state.auth.currency = state.auth.currency === 'USD' ? 'BDT' : 'USD';
+      saveState();
+      syncAllUI();
+      showToast(Currency switched to ${state.auth.currency}, 'info');
+    }
+
+    function setActiveAccountMode(mode) {
+      state.balances.activeMode = mode;
+      saveState();
+      syncAllUI();
+    }
+
+    function toggleActiveAccountMode() {
+      state.balances.activeMode = state.balances.activeMode === 'live' ? 'demo' : 'live';
+      saveState();
+      syncAllUI();
+      showToast(Switched to ${state.balances.activeMode.toUpperCase()} account, 'info');
+    }
+
+    function refreshDemoBalance() {
+      state.balances.demo = 10000.00;
+      saveState();
+      syncAllUI();
+      showToast('Demo balance refreshed to 10,000.00!', 'success');
+    }
+
+    function syncAllUI() {
+      const isLive = state.balances.activeMode === 'live';
+      const activeVal = isLive ? state.balances.live : state.balances.demo;
+      const minTrade = getMinTradeAmount();
+      const minDep = getMinDepositAmount();
+
+      document.getElementById('headerCurrencySubtitle').textContent = ${state.auth.currency} • SYNCED;
+      document.getElementById('currencyBadge').textContent = state.auth.currency;
+      document.getElementById('homeLiveBalance').textContent = formatMoney(state.balances.live);
+      document.getElementById('homeDemoBalance').textContent = formatMoney(state.balances.demo);
+
+      const reqTurnover = getRequiredTurnover();
+      document.getElementById('homeTurnoverHint').textContent =
+        Turnover: ${formatMoney(state.balances.turnoverCompleted)} / ${formatMoney(reqTurnover)};
+
+      document.getElementById('activeAccountLabel').textContent =
+        isLive ? '● Active: Live Account' : '● Active: Demo Account';
+
+      document.getElementById('chartModeTag').textContent = isLive ? 'LIVE' : 'DEMO';
+      document.getElementById('chartModeTag').className = isLive
+        ? 'text-[8px] font-bold uppercase tracking-wider text-[#16c784]'
+        : 'text-[8px] font-bold uppercase tracking-wider text-amber-400';
+      document.getElementById('chartBalanceValue').textContent = formatMoney(activeVal);
+
+      const pair = getSelectedPair();
+      document.getElementById('selectedPairFlags').textContent = pair.flags;
+      document.getElementById('selectedPairName').textContent = pair.name;
+      document.getElementById('selectedPairPayout').textContent = PAYOUT ${pair.payout}%;
+
+const invInput = document.getElementById('tradeInvestmentInput');
+      if (invInput && Number(invInput.value) < minTrade) {
+        invInput.value = minTrade;
+      }
+      document.getElementById('minTradeHintLabel').textContent =
+        state.auth.currency === 'BDT' ? 'Min ৳30' : 'Min $1';
+
+      document.getElementById('depositMinBanner').textContent =
+        Minimum Deposit: ${state.auth.currency === 'BDT' ? '৳120' : '$1'}. Promo code adds +30% bonus.;
+      document.getElementById('depositAmountLabel').textContent =
+        state.auth.currency === 'BDT' ? 'Amount (Min ৳120)' : 'Amount (Min $1)';
+
+      syncTradeDurationUI();
+      updatePayoutPreview();
+      updateHistoryUI();
+      syncProfileVerificationBadge();
+      syncAccountLockBanner();
+    }
+
+    // TRADE DURATION (5s - 5m) & CANDLESTICK STYLE
+    function toggleTradeTimePicker() {
+      document.getElementById('tradeTimePopover').classList.toggle('hidden');
+      syncTradeDurationUI();
+    }
+
+    function selectTradeDuration(sec) {
+      state.tradeDurationSec = Math.max(5, Math.min(300, Number(sec) || 15));
+      saveState();
+      syncTradeDurationUI();
+      document.getElementById('tradeTimePopover').classList.add('hidden');
+      showToast(Trade duration: ${formatDurationLabel(state.tradeDurationSec)}, 'info');
+    }
+
+    function stepTradeDuration(deltaIdx) {
+      const curSec = Number(state.tradeDurationSec) || 15;
+      let idx = TRADE_DURATIONS.findIndex((d) => d.sec === curSec);
+      if (idx === -1) idx = 1;
+      const nextIdx = Math.max(0, Math.min(TRADE_DURATIONS.length - 1, idx + deltaIdx));
+      state.tradeDurationSec = TRADE_DURATIONS[nextIdx].sec;
+      saveState();
+      syncTradeDurationUI();
+    }
+
+    function syncTradeDurationUI() {
+      const sec = Number(state.tradeDurationSec) || 15;
+      const btn = document.getElementById('tradeDurationDisplayBtn');
+      if (btn) btn.textContent = formatDurationLabel(sec);
+      document.querySelectorAll('.dur-chip').forEach((chip) => {
+        const chipSec = Number(chip.dataset.dur);
+        chip.className = chipSec === sec
+          ? 'dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#16c784] text-[#06110c]'
+          : 'dur-chip py-1.5 rounded-lg font-mono text-xs font-bold bg-[#1e2532] text-gray-200';
+      });
+    }
+
+    function setCandleStyle(style) {
+      state.settings.candleStyle = style;
+      saveState();
+      document.querySelectorAll('.cstyle-btn').forEach((b) => {
+        const active = b.dataset.cstyle === style;
+        b.className = active
+          ? 'cstyle-btn px-1.5 py-1 rounded-md text-[10px] font-bold bg-[#16c784] text-[#06110c]'
+          : 'cstyle-btn px-1.5 py-1 rounded-md text-[10px] font-semibold text-gray-400 hover:text-white';
+      });
+    }
+
+    // MARKET PAIRS
+    function getSelectedPair() {
+      return MARKET_PAIRS.find((p) => p.id === state.selectedPairId) || MARKET_PAIRS[0];
+    }
+
+    function selectPair(pairId) {
+      state.selectedPairId = pairId;
+      panOffsetCandles = 0;
+      saveState();
+      syncCandleClock(true);
+      syncAllUI();
+      renderMarketList();
+      closeAllModals();
+      switchTab('chart');
+    }
+
+    function setMarketFilter(filter) {
+      marketFilter = filter;
+      document.querySelectorAll('.market-filter-btn').forEach((btn) => {
+        const active = btn.dataset.filter === filter;
+        btn.className = active
+          ? 'market-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-[#16c784] text-[#06110c]'
+          : 'market-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#161b24] text-gray-300 border border-[#242c3a]';
+      });
+      renderMarketList();
+    }
+
+    function toggleFavorite(pairId, ev) {
+      ev.stopPropagation();
+      const idx = state.favorites.indexOf(pairId);
+      if (idx >= 0) state.favorites.splice(idx, 1);
+      else state.favorites.push(pairId);
+      saveState();
+      renderMarketList();
+    }
+
+function renderMarketList() {
+      const query = (document.getElementById('marketSearchInput')?.value || '').trim().toLowerCase();
+      const container = document.getElementById('marketPairList');
+      if (!container) return;
+
+      const filtered = MARKET_PAIRS.filter((p) => {
+        const matchesQuery = !query  p.name.toLowerCase().includes(query)  p.type.toLowerCase().includes(query);
+        if (!matchesQuery) return false;
+        if (marketFilter === 'FAV') return state.favorites.includes(p.id);
+        if (marketFilter === 'OTC') return p.type === 'OTC';
+        if (marketFilter === 'REAL') return p.type === 'REAL';
+        return true;
+      });
+
+      container.innerHTML = filtered.map((p) => {
+        const isFav = state.favorites.includes(p.id);
+        const pos = p.change >= 0;
+        const isSelected = p.id === state.selectedPairId;
+        return 
+          <div onclick="selectPair('${p.id}')" class="cursor-pointer rounded-xl bg-[#151921] hover:bg-[#1a202b] border ${isSelected ? 'border-[#16c784]/70' : 'border-[#222937]'} px-3.5 py-2.5 flex items-center justify-between transition">
+            <div class="flex items-center gap-2.5">
+              <button type="button" onclick="toggleFavorite('${p.id}', event)" class="text-sm ${isFav ? 'text-amber-400' : 'text-gray-600 hover:text-gray-400'}">★</button>
+              <span class="text-base">${p.flags}</span>
+              <div>
+                <div class="text-xs font-extrabold text-white flex items-center gap-1.5">
+                  <span>${p.name}</span>
+                  <span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${p.type === 'OTC' ? 'bg-amber-500/15 text-amber-300' : 'bg-sky-500/15 text-sky-300'}">${p.type}</span>
+                </div>
+                <div class="text-[11px] font-semibold text-[#16c784] mt-0.5">Profit ${p.payout}%</div>
+              </div>
+            </div>
+            <div class="text-right font-mono">
+              <div class="text-xs font-bold ${pos ? 'text-[#16c784]' : 'text-[#ea3943]'}">${pos ? '+' : ''}${p.change.toFixed(2)}%</div>
+              <div class="text-[10px] text-gray-400">${p.price.toFixed(p.price > 100 ? 2 : 5)}</div>
+            </div>
+          </div>
+        ;
+      }).join('');
+    }
+
+    // DETERMINISTIC TIME-SYNCHRONIZED CANDLES (NO GAPS, SMALL/MEDIUM BODIES & WICKS)
+    function seededNoise(seed) {
+      const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+      return x - Math.floor(x);
+    }
+
+    function buildDeterministicCandle(pair, bucketIndex, prevClosePrice) {
+      const step = pair.price > 500 ? pair.price * 0.00055 : pair.price > 50 ? pair.price * 0.00065 : 0.00022;
+      const r1 = seededNoise(bucketIndex * 3 + pair.name.length * 17);
+      const r2 = seededNoise(bucketIndex * 7 + 11);
+      const r3 = seededNoise(bucketIndex * 13 + 29);
+
+      // Bias ~70% against heavy UP pressure / slightly lean bearish/choppy with gentle medium size
+      let dir = r1 > 0.52 ? 1 : -1;
+      if (activeTrades.some((t) => t.direction === 'UP') && r2 > 0.28) {
+        dir = -1;
+      } else if (activeTrades.some((t) => t.direction === 'DOWN') && r2 > 0.28) {
+        dir = 1;
+      }
+
+      const open = prevClosePrice;
+      const bodyMag = step * (0.25 + r2 * 0.65);
+      const close = Math.max(0.0001, open + dir * bodyMag);
+
+      // Small/medium wicks attached seamlessly to body
+      const topWick = step * (0.06 + r3 * 0.22);
+      const botWick = step * (0.06 + (1 - r3) * 0.22);
+      const high = Math.max(open, close) + topWick;
+      const low = Math.max(0.0001, Math.min(open, close) - botWick);
+
+      return { bucketIndex, open, close, high, low };
+    }
+
+    function syncCandleClock(forceRebuild = false) {
+      const nowSec = Math.floor(Date.now() / 1000);
+      const tf = Number(state.timeframeSec) || 60;
+      const currentBucket = Math.floor(nowSec / tf);
+      const remSec = Math.max(0, tf - (nowSec % tf));
+
+const mins = Math.floor(remSec / 60);
+      const secs = remSec % 60;
+      const cdEl = document.getElementById('candleCountdownText');
+      if (cdEl) cdEl.textContent = ${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')};
+
+      const clkEl = document.getElementById('chartClockUtc');
+      if (clkEl) clkEl.textContent = new Date(nowSec * 1000).toTimeString().slice(0, 8);
+
+      const pair = getSelectedPair();
+      const historyCount = 65;
+
+      if (forceRebuild  candles.length === 0  candles[candles.length - 1].bucketIndex !== currentBucket) {
+        candles = [];
+        let runningPrice = pair.price;
+        const startBucket = currentBucket - historyCount;
+        for (let b = startBucket; b <= currentBucket; b++) {
+          const c = buildDeterministicCandle(pair, b, runningPrice);
+          candles.push(c);
+          runningPrice = c.close;
+        }
+      }
+
+      // Gentle sub-second movement inside current candle; in last 5s leans opposite to active trades
+      const cur = candles[candles.length - 1];
+      const step = pair.price > 500 ? pair.price * 0.00009 : pair.price > 50 ? pair.price * 0.00011 : 0.000035;
+      const subR = seededNoise(nowSec * 5 + pair.name.length);
+      let nudge = (subR - 0.5) * step * 1.6;
+
+      if (remSec <= 5 && activeTrades.length > 0) {
+        const hasUp = activeTrades.some((t) => t.direction === 'UP');
+        const hasDown = activeTrades.some((t) => t.direction === 'DOWN');
+        if (hasUp && !hasDown) nudge = -Math.abs(nudge) - step * 0.4;
+        else if (hasDown && !hasUp) nudge = Math.abs(nudge) + step * 0.4;
+      }
+
+      cur.close = Math.max(0.0001, cur.close + nudge);
+      cur.high = Math.max(cur.high, cur.close, cur.open);
+      cur.low = Math.min(cur.low, cur.close, cur.open);
+      pair.price = cur.close;
+
+      if (nowSec !== lastProcessedSec) {
+        lastProcessedSec = nowSec;
+        processActiveTrades();
+      }
+    }
+
+    function setTimeframe(sec) {
+      state.timeframeSec = sec;
+      saveState();
+      document.querySelectorAll('.tf-btn').forEach((btn) => {
+        const active = Number(btn.dataset.tf) === sec;
+        btn.className = active
+          ? 'tf-btn px-1.5 py-1 rounded-lg text-[10px] font-mono font-bold bg-[#16c784] text-[#06110c]'
+          : 'tf-btn px-1.5 py-1 rounded-lg text-[10px] font-mono font-semibold text-gray-400 hover:text-white';
+      });
+      syncCandleClock(true);
+    }
+
+    function adjustZoom(factor) {
+      zoomLevel = Math.max(0.5, Math.min(2.6, zoomLevel * factor));
+    }
+
+    function resizeChartCanvas() {
+      const wrap = document.getElementById('chartCanvasWrap');
+      const canvas = document.getElementById('candlestickCanvas');
+      if (!wrap || !canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = wrap.getBoundingClientRect();
+      canvas.width = Math.max(10, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(10, Math.floor(rect.height * dpr));
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function getDisplayCandles(rawList) {
+      const style = state.settings.candleStyle || 'STANDARD';
+      if (style !== 'HEIKIN') return rawList;
+
+      const ha = [];
+      for (let i = 0; i < rawList.length; i++) {
+        const c = rawList[i];
+        const haClose = (c.open + c.high + c.low + c.close) / 4;
+        const haOpen = i === 0 ? (c.open + c.close) / 2 : (ha[i - 1].open + ha[i - 1].close) / 2;
+        const haHigh = Math.max(c.high, haOpen, haClose);
+        const haLow = Math.min(c.low, haOpen, haClose);
+        ha.push({ bucketIndex: c.bucketIndex, open: haOpen, close: haClose, high: haHigh, low: haLow });
+      }
+      return ha;
+    }
+
+    function renderCandlestickChart() {
+      const canvas = document.getElementById('candlestickCanvas');
+      const wrap = document.getElementById('chartCanvasWrap');
+      if (!canvas  !wrap  candles.length === 0) return;
+
+const ctx = canvas.getContext('2d');
+      const w = wrap.clientWidth;
+      const h = wrap.clientHeight;
+      if (w <= 0 || h <= 0) return;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Grid lines
+      const alpha = Math.max(0, Math.min(0.45, (state.settings.gridOpacity / 20) * 0.25));
+      if (alpha > 0) {
+        ctx.strokeStyle = rgba(148, 163, 184, ${alpha.toFixed(3)});
+        ctx.lineWidth = 1;
+        for (let c = 1; c < 6; c++) {
+          const gx = (w / 6) * c;
+          ctx.beginPath();
+          ctx.moveTo(gx, 0);
+          ctx.lineTo(gx, h);
+          ctx.stroke();
+        }
+        for (let r = 1; r < 5; r++) {
+          const gy = (h / 5) * r;
+          ctx.beginPath();
+          ctx.moveTo(0, gy);
+          ctx.lineTo(w, gy);
+          ctx.stroke();
+        }
+      }
+
+      const displaySeries = getDisplayCandles(candles);
+      const baseVisible = 26;
+      const visibleCount = Math.max(4, Math.min(displaySeries.length, Math.round(baseVisible / zoomLevel)));
+      const maxPan = Math.max(0, displaySeries.length - visibleCount);
+      panOffsetCandles = Math.max(0, Math.min(maxPan, Math.round(panOffsetCandles)));
+
+      const endIdx = displaySeries.length - panOffsetCandles;
+      const startIdx = Math.max(0, endIdx - visibleCount);
+      const slice = displaySeries.slice(startIdx, endIdx);
+
+      let minPrice = Infinity;
+      let maxPrice = -Infinity;
+      slice.forEach((c) => {
+        if (c.low < minPrice) minPrice = c.low;
+        if (c.high > maxPrice) maxPrice = c.high;
+      });
+      if (!isFinite(minPrice)  !isFinite(maxPrice)  minPrice === maxPrice) {
+        minPrice = 0.99;
+        maxPrice = 1.01;
+      }
+      const pad = (maxPrice - minPrice) * 0.16;
+      minPrice -= pad;
+      maxPrice += pad;
+
+      const rightAxisWidth = 62;
+      const plotW = Math.max(40, w - rightAxisWidth);
+      const plotH = Math.max(40, h - 22);
+      const slotW = plotW / slice.length;
+      const bodyW = Math.max(3, slotW * 0.72);
+
+      const priceToY = (p) => {
+        const ratio = (p - minPrice) / (maxPrice - minPrice);
+        return 10 + (1 - ratio) * (plotH - 12);
+      };
+
+      // Draw active indicators & lines
+      drawActiveIndicators(ctx, displaySeries, startIdx, slice, slotW, plotW, priceToY);
+
+      // Draw candles (Standard, Hollow, Heikin Ashi)
+      const style = state.settings.candleStyle || 'STANDARD';
+      slice.forEach((c, i) => {
+        const centerX = i * slotW + slotW * 0.5;
+        const leftX = i * slotW + (slotW - bodyW) * 0.5;
+        const isBull = c.close >= c.open;
+        const col = isBull ? state.settings.upColor : state.settings.downColor;
+
+        const yHigh = priceToY(c.high);
+        const yLow = priceToY(c.low);
+        const yOpen = priceToY(c.open);
+        const yClose = priceToY(c.close);
+
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(centerX, yHigh);
+        ctx.lineTo(centerX, yLow);
+        ctx.stroke();
+
+        const topY = Math.min(yOpen, yClose);
+        const bodyH = Math.max(2, Math.abs(yClose - yOpen));
+
+        if (style === 'HOLLOW' && isBull) {
+          ctx.fillStyle = '#0d1117';
+          ctx.fillRect(leftX, topY, bodyW, bodyH);
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(leftX, topY, bodyW, bodyH);
+        } else {
+          ctx.fillStyle = col;
+          ctx.fillRect(leftX, topY, bodyW, bodyH);
+        }
+      });
+
+      // Active trade lines
+      activeTrades.forEach((tr) => {
+        const ey = priceToY(tr.entryPrice);
+        if (ey >= 6 && ey <= plotH) {
+          const isUp = tr.direction === 'UP';
+          ctx.save();
+          ctx.strokeStyle = isUp ? '#16c784' : '#ea3943';
+          ctx.setLineDash([4, 3]);
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(0, ey);
+          ctx.lineTo(plotW, ey);
+          ctx.stroke();
+          ctx.restore();
+        }
+      });
+
+// Current price line & axis
+      const lastC = slice[slice.length - 1];
+      const curY = priceToY(lastC.close);
+      const curCol = lastC.close >= lastC.open ? state.settings.upColor : state.settings.downColor;
+
+      ctx.strokeStyle = curCol;
+      ctx.setLineDash([3, 3]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, curY);
+      ctx.lineTo(plotW, curY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = 'rgba(13, 17, 23, 0.9)';
+      ctx.fillRect(plotW, 0, rightAxisWidth, h);
+      ctx.font = '600 10px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#9ca3af';
+      for (let r = 0; r <= 4; r++) {
+        const pVal = minPrice + ((maxPrice - minPrice) * r) / 4;
+        ctx.fillText(pVal.toFixed(pVal > 100 ? 1 : 4), plotW + 5, priceToY(pVal) + 3);
+      }
+
+      ctx.fillStyle = curCol;
+      ctx.fillRect(plotW + 2, curY - 10, rightAxisWidth - 4, 20);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 10px "JetBrains Mono", monospace';
+      ctx.fillText(lastC.close.toFixed(lastC.close > 100 ? 1 : 4), plotW + 5, curY + 3.5);
+    }
+
+    // 10 INDICATORS + TRENDLINE + HORIZONTAL LINE
+    function renderIndicatorChecklist() {
+      const box = document.getElementById('indicatorChecklistContainer');
+      if (!box) return;
+      const active = state.settings.activeIndicators || [];
+      document.getElementById('activeIndicatorCountBadge').textContent = String(active.length);
+
+      box.innerHTML = INDICATOR_OPTIONS.map((opt) => {
+        const checked = active.includes(opt.id);
+        return 
+          <label class="flex items-center justify-between px-2.5 py-1.5 rounded-xl bg-[#0e131b] hover:bg-[#151c27] cursor-pointer text-xs">
+            <span class="${checked ? 'text-[#16c784] font-bold' : 'text-gray-200'}">${opt.label}</span>
+            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleIndicatorItem('${opt.id}')" class="accent-[#16c784] rounded" />
+          </label>
+        ;
+      }).join('');
+    }
+
+    function toggleIndicatorBox() {
+      renderIndicatorChecklist();
+      document.getElementById('indicatorBoxPopover').classList.toggle('hidden');
+    }
+
+    function toggleIndicatorItem(id) {
+      const list = state.settings.activeIndicators || [];
+      const idx = list.indexOf(id);
+      if (idx >= 0) list.splice(idx, 1);
+      else list.push(id);
+      state.settings.activeIndicators = list;
+      saveState();
+      renderIndicatorChecklist();
+    }
+
+    function clearAllIndicators() {
+      state.settings.activeIndicators = [];
+      saveState();
+      renderIndicatorChecklist();
+      showToast('All indicators cleared', 'info');
+    }
+
+    function drawActiveIndicators(ctx, fullSeries, startIdx, slice, slotW, plotW, priceToY) {
+      const active = state.settings.activeIndicators || [];
+      if (!active.length || !slice.length) return;
+
+      const closes = fullSeries.map((c) => c.close);
+      ctx.save();
+
+      active.forEach((ind) => {
+        if (ind === 'EMA'  ind === 'SMA'  ind === 'VWAP') {
+          const period = ind === 'EMA' ? 14 : 20;
+          const k = 2 / (period + 1);
+          let ema = closes[0];
+          const vals = closes.map((v, i) => {
+            if (i === 0) return v;
+            if (ind === 'SMA' || ind === 'VWAP') {
+              const s = Math.max(0, i - period + 1);
+              const sub = closes.slice(s, i + 1);
+              return sub.reduce((a, b) => a + b, 0) / sub.length;
+            }
+            ema = v * k + ema * (1 - k);
+            return ema;
+          });
+          ctx.strokeStyle = ind === 'EMA' ? '#34d399' : ind === 'SMA' ? '#38bdf8' : '#c084fc';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          slice.forEach((_, i) => {
+            const x = i * slotW + slotW * 0.5;
+
+const y = priceToY(vals[startIdx + i]);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        } else if (ind === 'BOLL') {
+          const period = 14;
+          ctx.strokeStyle = '#fbbf24';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          slice.forEach((_, i) => {
+            const g = startIdx + i;
+            const sub = closes.slice(Math.max(0, g - period + 1), g + 1);
+            const mean = sub.reduce((a, b) => a + b, 0) / sub.length;
+            const sd = Math.sqrt(sub.reduce((a, b) => a + (b - mean) ** 2, 0) / sub.length);
+            const x = i * slotW + slotW * 0.5;
+            const y = priceToY(mean + sd * 1.8);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        } else if (ind === 'TRENDLINE') {
+          const firstP = slice[0].close;
+          const lastP = slice[slice.length - 1].close;
+          ctx.strokeStyle = '#60a5fa';
+          ctx.lineWidth = 1.6;
+          ctx.beginPath();
+          ctx.moveTo(slotW * 0.5, priceToY(firstP));
+          ctx.lineTo((slice.length - 0.5) * slotW, priceToY(lastP));
+          ctx.stroke();
+        } else if (ind === 'HLINE') {
+          const avgP = slice.reduce((a, b) => a + b.close, 0) / slice.length;
+          const hy = priceToY(avgP);
+          ctx.strokeStyle = '#f472b6';
+          ctx.setLineDash([6, 4]);
+          ctx.lineWidth = 1.4;
+          ctx.beginPath();
+          ctx.moveTo(0, hy);
+          ctx.lineTo(plotW, hy);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        } else if (ind === 'RSI'  ind === 'MACD'  ind === 'ATR' || ind === 'STOCH') {
+          // Subtle oscillator overlay curve near bottom of chart
+          const baseVal = slice[0].close;
+          ctx.strokeStyle = ind === 'RSI' ? '#a78bfa' : ind === 'MACD' ? '#22d3ee' : ind === 'ATR' ? '#fb923c' : '#4ade80';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          slice.forEach((c, i) => {
+            const osc = baseVal + ((c.close - c.open) * 1.4);
+            const x = i * slotW + slotW * 0.5;
+            const y = priceToY(osc);
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        }
+      });
+
+      ctx.restore();
+    }
+
+    // CHART PAN & PINCH/WHEEL ZOOM
+    function setupChartInteractions() {
+      const canvas = document.getElementById('candlestickCanvas');
+      if (!canvas) return;
+
+      canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        adjustZoom(e.deltaY < 0 ? 1.15 : 0.86);
+      }, { passive: false });
+
+      canvas.addEventListener('mousedown', (e) => {
+        isDraggingChart = true;
+        dragStartX = e.clientX;
+        dragStartPan = panOffsetCandles;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDraggingChart) return;
+        panOffsetCandles = dragStartPan + Math.round((e.clientX - dragStartX) / 14);
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDraggingChart = false;
+      });
+
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+          pinchStartDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          pinchStartZoom = zoomLevel;
+        } else if (e.touches.length === 1) {
+          isDraggingChart = true;
+          dragStartX = e.touches[0].clientX;
+          dragStartPan = panOffsetCandles;
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && pinchStartDist) {
+          const d = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+
+e.touches[0].clientY - e.touches[1].clientY
+          );
+          zoomLevel = Math.max(0.5, Math.min(2.6, pinchStartZoom * (d / pinchStartDist)));
+        } else if (e.touches.length === 1 && isDraggingChart) {
+          panOffsetCandles = dragStartPan + Math.round((e.touches[0].clientX - dragStartX) / 14);
+        }
+      }, { passive: true });
+
+      canvas.addEventListener('touchend', () => {
+        isDraggingChart = false;
+        pinchStartDist = null;
+      });
+    }
+
+    // TRADE PLACEMENT, REFUND ON EXACT TIE, 70% LOSS BIAS & 4X CAP LOCK
+    function stepInvestment(delta) {
+      const minAmt = getMinTradeAmount();
+      const input = document.getElementById('tradeInvestmentInput');
+      const cur = Math.max(minAmt, Number(input.value) || minAmt);
+      input.value = Math.max(minAmt, Number((cur + delta).toFixed(2)));
+      updatePayoutPreview();
+    }
+
+    function updatePayoutPreview() {
+      const amt = Math.max(0, Number(document.getElementById('tradeInvestmentInput')?.value) || 0);
+      const pair = getSelectedPair();
+      const profit = amt * (pair.payout / 100);
+      document.getElementById('estPayoutPreview').textContent = +${formatMoney(amt + profit)};
+    }
+
+    function checkAndTrigger4xLock() {
+      const dep = Number(state.balances.totalDeposited) || 0;
+      if (dep <= 0 || state.balances.activeMode !== 'live') return false;
+      const cap = dep * 4;
+      if (state.balances.live > cap) {
+        state.balances.isBlocked = true;
+        state.balances.blockBaseline = cap;
+        saveState();
+        syncAccountLockBanner();
+        return true;
+      }
+      return false;
+    }
+
+    function syncAccountLockBanner() {
+      const banner = document.getElementById('accountLockStatusBanner');
+      if (!banner) return;
+      if (state.balances.isBlocked) {
+        banner.textContent = 'Status: Blocked (4x profit limit reached)';
+        banner.className = 'text-xs font-mono px-3 py-2 rounded-xl bg-red-950/50 border border-red-500/50 text-red-300';
+      } else {
+        banner.textContent = 'Status: Active';
+        banner.className = 'text-xs font-mono px-3 py-2 rounded-xl bg-[#0e1218] border border-[#232a38] text-emerald-300';
+      }
+    }
+
+    function submitAccountUnlock(e) {
+      e.preventDefault();
+      const code = document.getElementById('unblockCodeInput').value.trim();
+      document.getElementById('unblockCodeInput').value = '';
+      if (code !== 'mx017') {
+        showToast('Invalid unlock code.', 'error');
+        return;
+      }
+      const keepLimit = state.balances.blockBaseline > 0
+        ? state.balances.blockBaseline
+        : Math.max(0, (Number(state.balances.totalDeposited) || 0) * 4);
+      if (keepLimit > 0 && state.balances.live > keepLimit) {
+        state.balances.live = Number(keepLimit.toFixed(2));
+      }
+      state.balances.isBlocked = false;
+      saveState();
+      syncAllUI();
+      showToast('Account unlocked. Excess above 4x limit adjusted.', 'success');
+    }
+
+    function placeTrade(direction) {
+      document.getElementById('tradeTimePopover')?.classList.add('hidden');
+
+      if (state.balances.activeMode === 'live' && state.balances.isBlocked) {
+        showToast('Your account is blocked', 'error');
+        return;
+      }
+
+      const amt = Number(document.getElementById('tradeInvestmentInput').value);
+      const minAmt = getMinTradeAmount();
+      if (!amt || amt < minAmt) {
+        showToast(Minimum trade amount is ${formatMoney(minAmt)}., 'error');
+        return;
+      }
+
+      const mode = state.balances.activeMode;
+      const available = mode === 'live' ? state.balances.live : state.balances.demo;
+      if (amt > available) {
+        showToast(Insufficient ${mode.toUpperCase()} balance., 'error');
+        return;
+      }
+
+      if (mode === 'live') {
+
+state.balances.live = Number((state.balances.live - amt).toFixed(2));
+        state.balances.turnoverCompleted = Number(((state.balances.turnoverCompleted || 0) + amt).toFixed(2));
+      } else {
+        state.balances.demo = Number((state.balances.demo - amt).toFixed(2));
+      }
+
+      const pair = getSelectedPair();
+      const entryPrice = candles.length ? candles[candles.length - 1].close : pair.price;
+      const durationSec = Math.max(5, Math.min(300, Number(state.tradeDurationSec) || 15));
+
+      activeTrades.push({
+        id: 'TRD-' + Math.floor(100000 + Math.random() * 900000),
+        pairName: pair.name,
+        payoutPct: pair.payout,
+        direction,
+        amount: amt,
+        mode,
+        entryPrice,
+        durationSec,
+        endTimeSec: Math.floor(Date.now() / 1000) + durationSec,
+      });
+
+      playSoundCue('trade');
+      renderActiveTradesBadges();
+      saveState();
+      syncAllUI();
+      showToast(${direction} (${formatDurationLabel(durationSec)}) placed on ${pair.name}, 'info');
+    }
+
+    function processActiveTrades() {
+      if (activeTrades.length === 0) return;
+      const nowSec = Math.floor(Date.now() / 1000);
+      const curCandle = candles[candles.length - 1];
+      let finalPrice = curCandle ? curCandle.close : getSelectedPair().price;
+      const stillActive = [];
+
+      activeTrades.forEach((tr) => {
+        if (nowSec < tr.endTimeSec) {
+          stillActive.push(tr);
+        } else {
+          // ~70% loss / ~30% profit tilt unless exact tie
+          const step = finalPrice > 500 ? finalPrice * 0.00025 : finalPrice > 50 ? finalPrice * 0.0003 : 0.00008;
+          const roll = Math.random();
+          if (roll < 0.04) {
+            // Exact tie -> refund
+            finalPrice = tr.entryPrice;
+          } else if (roll < 0.72) {
+            // Lean opposite of trade direction (~70% loss bias)
+            finalPrice = tr.direction === 'UP'
+              ? Math.max(0.0001, tr.entryPrice - step * (0.4 + Math.random()))
+              : tr.entryPrice + step * (0.4 + Math.random());
+          } else {
+            // Profit direction
+            finalPrice = tr.direction === 'UP'
+              ? tr.entryPrice + step * (0.4 + Math.random())
+              : Math.max(0.0001, tr.entryPrice - step * (0.4 + Math.random()));
+          }
+
+          if (curCandle) {
+            curCandle.close = finalPrice;
+            curCandle.high = Math.max(curCandle.high, finalPrice);
+            curCandle.low = Math.min(curCandle.low, finalPrice);
+          }
+
+          const isRefund = finalPrice === tr.entryPrice;
+          const won = !isRefund && (tr.direction === 'UP' ? finalPrice > tr.entryPrice : finalPrice < tr.entryPrice);
+          const profit = won ? Number((tr.amount * (tr.payoutPct / 100)).toFixed(2)) : 0;
+
+          if (isRefund) {
+            if (tr.mode === 'live') state.balances.live = Number((state.balances.live + tr.amount).toFixed(2));
+            else state.balances.demo = Number((state.balances.demo + tr.amount).toFixed(2));
+            playSoundCue('refund');
+          } else if (won) {
+            const ret = Number((tr.amount + profit).toFixed(2));
+            if (tr.mode === 'live') {
+              state.balances.live = Number((state.balances.live + ret).toFixed(2));
+              state.livePnl24h = Number((state.livePnl24h + profit).toFixed(2));
+            } else {
+              state.balances.demo = Number((state.balances.demo + ret).toFixed(2));
+            }
+            playSoundCue('win');
+          } else {
+            if (tr.mode === 'live') {
+              state.livePnl24h = Number((state.livePnl24h - tr.amount).toFixed(2));
+            }
+            playSoundCue('loss');
+          }
+
+          state.trades.unshift({
+            id: tr.id,
+            pairName: tr.pairName,
+
+direction: tr.direction,
+            durationLabel: formatDurationLabel(tr.durationSec),
+            amount: tr.amount,
+            mode: tr.mode,
+            outcome: isRefund ? 'REFUND' : won ? 'PROFIT' : 'LOSS',
+            pnl: isRefund ? 0 : won ? profit : -tr.amount,
+            timestamp: Date.now(),
+          });
+
+          const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+          state.trades = state.trades.filter((x) => x.timestamp >= cutoff);
+
+          if (tr.mode === 'live') {
+            checkAndTrigger4xLock();
+          }
+
+          showToast(
+            isRefund
+              ? REFUND ${formatMoney(tr.amount)} (Exact tie on ${tr.pairName})
+              : won
+              ? PROFIT +${formatMoney(profit)} on ${tr.pairName} (${tr.direction})
+              : LOSS -${formatMoney(tr.amount)} on ${tr.pairName} (${tr.direction}),
+            isRefund ? 'info' : won ? 'success' : 'error'
+          );
+        }
+      });
+
+      activeTrades = stillActive;
+      renderActiveTradesBadges();
+      saveState();
+      syncAllUI();
+    }
+
+    function renderActiveTradesBadges() {
+      const box = document.getElementById('activeTradesFloating');
+      if (!box) return;
+      const nowSec = Math.floor(Date.now() / 1000);
+      box.innerHTML = activeTrades.map((t) => {
+        const left = Math.max(0, t.endTimeSec - nowSec);
+        return 
+          <div class="px-2 py-1 rounded-lg bg-[#11161f]/90 border ${t.direction === 'UP' ? 'border-[#16c784]/60 text-[#16c784]' : 'border-[#ea3943]/60 text-[#ea3943]'} text-[10px] font-mono font-bold">
+            ${t.direction} ${formatMoney(t.amount)} • ${left}s
+          </div>
+        ;
+      }).join('');
+    }
+
+    function toggleHistoryDrawer() {
+      document.getElementById('historyDrawer').classList.toggle('hidden');
+      updateHistoryUI();
+    }
+
+    function updateHistoryUI() {
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      const recent = state.trades.filter((t) => t.timestamp >= cutoff);
+      const wins = recent.filter((t) => t.outcome === 'PROFIT').length;
+      const losses = recent.filter((t) => t.outcome === 'LOSS').length;
+
+      document.getElementById('historyBadgeCount').textContent = ${wins}W/${losses}L;
+      document.getElementById('historyWinLossSummary').textContent = Wins: ${wins} • Losses: ${losses};
+
+      const listEl = document.getElementById('historyListContainer');
+      if (!listEl) return;
+      if (!recent.length) {
+        listEl.innerHTML = '<div class="text-gray-500 text-center py-4">No trades in last 24h.</div>';
+        return;
+      }
+
+      listEl.innerHTML = recent.slice(0, 20).map((t) => {
+        const cls = t.outcome === 'PROFIT' ? 'text-[#16c784]' : t.outcome === 'LOSS' ? 'text-[#ea3943]' : 'text-sky-300';
+        const label = t.outcome === 'REFUND' ? REFUND ${formatMoney(t.amount)} : ${t.outcome} ${t.pnl >= 0 ? '+' : '-'}${formatMoney(Math.abs(t.pnl))};
+        return 
+          <div class="flex items-center justify-between px-2.5 py-2 rounded-xl bg-[#0e1218] border border-[#202735]">
+            <div>
+              <div class="font-bold text-white">${t.pairName} <span class="text-[10px] ${t.direction === 'UP' ? 'text-[#16c784]' : 'text-[#ea3943]'}">${t.direction}</span></div>
+              <div class="text-[10px] text-gray-400">${t.mode.toUpperCase()} • ${t.durationLabel}</div>
+            </div>
+            <div class="font-mono font-bold ${cls}">${label}</div>
+          </div>
+        ;
+      }).join('');
+    }
+
+    // DEPOSIT, PROMO mx017 (+30%), WITHDRAWAL (40% FEE), TIERS & TURNOVER RULES
+    function getRequiredTurnover() {
+      const dep = Number(state.balances.totalDeposited) || 0;
+      if (dep <= 0) return 0;
+      const mult = state.auth.currency === 'BDT' ? 3 : 2;
+      return Number((dep * mult).toFixed(2));
+    }
+
+function getWithdrawTierMinimum() {
+      const lastDep = state.deposits.length ? Number(state.deposits[0].amount)  0 : Number(state.balances.totalDeposited)  0;
+      if (state.auth.currency === 'BDT') {
+        if (lastDep >= 300) return 1500;
+        if (lastDep >= 120) return 800;
+        return 800;
+      }
+      if (lastDep >= 2.5) return 12.5;
+      return 6.67;
+    }
+
+    function openDepositModal() {
+      document.getElementById('depositStep1').classList.remove('hidden');
+      document.getElementById('depositStep2').classList.add('hidden');
+      openModal('depositModal');
+    }
+
+    function openDepositGateway(method) {
+      currentDepositMethod = method;
+      document.getElementById('depositStep1').classList.add('hidden');
+      document.getElementById('depositStep2').classList.remove('hidden');
+      document.getElementById('depositGatewayMethodLabel').textContent = ${method} Send Money;
+    }
+
+    function backToDepositMethod() {
+      document.getElementById('depositStep2').classList.add('hidden');
+      document.getElementById('depositStep1').classList.remove('hidden');
+    }
+
+    function submitDepositRequest(e) {
+      e.preventDefault();
+      const amount = Number(document.getElementById('depositAmountInput').value);
+      const promo = document.getElementById('depositPromoInput').value.trim();
+      const senderNum = document.getElementById('depositSenderNumber').value.trim();
+      const trxId = document.getElementById('depositTrxId').value.trim();
+      const fastSim = document.getElementById('fastCreditSimToggle').checked;
+      const minDep = getMinDepositAmount();
+
+      if (!amount || amount < minDep) {
+        showToast(Minimum deposit is ${formatMoney(minDep)}., 'error');
+        return;
+      }
+
+      const bonus = promo === 'mx017' ? Number((amount * 0.3).toFixed(2)) : 0;
+      const totalCredit = Number((amount + bonus).toFixed(2));
+
+      const msg = Deposit (${currentDepositMethod}) | Amount: ${amount} | Bonus: ${bonus} | From: ${senderNum} | TrxID: ${trxId} | UID: ${state.auth.uid};
+      window.open(https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}, '_blank', 'noopener');
+
+      closeAllModals();
+      showToast(
+        bonus > 0
+          ? Promo mx017 applied (+30% bonus)! Crediting ${formatMoney(totalCredit)} in ${fastSim ? '10s' : '2m'}...
+          : Deposit submitted! Crediting ${formatMoney(totalCredit)} in ${fastSim ? '10s' : '2m'}...,
+        'info'
+      );
+
+      setTimeout(() => {
+        state.balances.live = Number((state.balances.live + totalCredit).toFixed(2));
+        state.balances.totalDeposited = Number(((state.balances.totalDeposited || 0) + amount).toFixed(2));
+        state.balances.activeMode = 'live';
+
+        state.deposits.unshift({
+          id: 'DEP-' + Math.floor(100000 + Math.random() * 900000),
+          method: currentDepositMethod,
+          amount,
+          bonus,
+          totalCredit,
+          trxId,
+          status: 'Completed',
+          timestamp: Date.now(),
+        });
+
+        saveState();
+        syncAllUI();
+        showToast(Credited +${formatMoney(totalCredit)} to Live Balance!, 'success');
+      }, fastSim ? 10000 : 120000);
+    }
+
+    function openWithdrawModal() {
+      const reqTurnover = getRequiredTurnover();
+      const curTurnover = Number(state.balances.turnoverCompleted) || 0;
+      const tierMin = getWithdrawTierMinimum();
+      const box = document.getElementById('withdrawRulesSummaryBox');
+      box.innerHTML = 
+        <div>• Turnover: <strong class="text-white font-mono">${formatMoney(curTurnover)} / ${formatMoney(reqTurnover)}</strong></div>
+        <div>• Tier Min Balance: <strong class="text-emerald-300 font-mono">${formatMoney(tierMin)}</strong></div>
+        <div>• Withdrawal Fee: <strong class="text-amber-300 font-mono">40%</strong></div>
+      ;
+      updateWithdrawFeePreview();
+      openModal('withdrawModal');
+    }
+
+function updateWithdrawFeePreview() {
+      const amt = Math.max(0, Number(document.getElementById('withdrawAmount')?.value) || 0);
+      const fee = Number((amt * 0.4).toFixed(2));
+      const net = Number((amt - fee).toFixed(2));
+      const el = document.getElementById('withdrawFeePreview');
+      if (el) el.textContent = 40% fee: ${formatMoney(fee)} • Net payout: ${formatMoney(net)};
+    }
+
+    function submitWithdrawRequest(e) {
+      e.preventDefault();
+      const method = document.getElementById('withdrawMethod').value;
+      const account = document.getElementById('withdrawAccount').value.trim();
+      const amount = Number(document.getElementById('withdrawAmount').value);
+
+      const reqTurnover = getRequiredTurnover();
+      const curTurnover = Number(state.balances.turnoverCompleted) || 0;
+      const tierMin = getWithdrawTierMinimum();
+
+      if (curTurnover < reqTurnover) {
+        showToast(Turnover incomplete: wager ${formatMoney(reqTurnover - curTurnover)} more before withdrawing., 'error');
+        return;
+      }
+      if (state.balances.live < tierMin) {
+        showToast(Live balance must reach at least ${formatMoney(tierMin)} for your deposit tier., 'error');
+        return;
+      }
+      if (!amount  amount <= 0  amount > state.balances.live) {
+        showToast('Invalid or excessive withdrawal amount.', 'error');
+        return;
+      }
+
+      const fee = Number((amount * 0.4).toFixed(2));
+      const netPayout = Number((amount - fee).toFixed(2));
+
+      state.balances.live = Number((state.balances.live - amount).toFixed(2));
+      state.withdrawals.unshift({
+        id: 'WDR-' + Math.floor(100000 + Math.random() * 900000),
+        method,
+        account,
+        amount,
+        fee,
+        netPayout,
+        status: 'Submitted',
+        timestamp: Date.now(),
+      });
+
+      saveState();
+      syncAllUI();
+      closeAllModals();
+      showToast(Withdrawal submitted! Net payout after 40% fee: ${formatMoney(netPayout)}, 'success');
+    }
+
+    function openRulesModal() {
+      const reqTurnover = getRequiredTurnover();
+      const curTurnover = Number(state.balances.turnoverCompleted) || 0;
+      const tierMin = getWithdrawTierMinimum();
+      document.getElementById('infoModalTitle').textContent = 'Rules & Turnover Requirements';
+      document.getElementById('infoModalBody').innerHTML = 
+        <div class="p-3 rounded-xl bg-[#0e1218] border border-[#232b3a] space-y-1.5">
+          <div class="font-bold text-white">1. Deposit & Trade Minimums</div>
+          <div>• USD mode: Min deposit $1, Min trade $1.</div>
+          <div>• BDT mode: Min deposit ৳120, Min trade ৳30.</div>
+        </div>
+        <div class="p-3 rounded-xl bg-[#0e1218] border border-[#232b3a] space-y-1.5">
+          <div class="font-bold text-amber-300">2. Tier & Turnover Withdrawal Rules</div>
+          <div>• Deposit ~120 BDT tier: requires balance ≥ ৳800 and full turnover.</div>
+          <div>• Deposit ≥ 300 BDT tier: requires balance ≥ ৳1500 and full turnover.</div>
+          <div>• Current Turnover: <span class="font-mono text-white">${formatMoney(curTurnover)} / ${formatMoney(reqTurnover)}</span></div>
+          <div>• Active Tier Minimum: <span class="font-mono text-emerald-300">${formatMoney(tierMin)}</span></div>
+        </div>
+        <div class="p-3 rounded-xl bg-[#0e1218] border border-[#232b3a] space-y-1.5">
+          <div class="font-bold text-sky-300">3. Fees & Settlement</div>
+          <div>• Withdrawals deduct a 40% processing fee.</div>
+          <div>• Exact tie at entry price refunds the stake; UP above entry wins, DOWN below entry wins.</div>
+        </div>
+      ;
+      openModal('infoModal');
+    }
+
+    // FULL HISTORY TAB
+    function setHistorySubTab(sub) {
+      historySubTab = sub;
+      ['deposits', 'withdrawals', 'trades'].forEach((k) => {
+
+const btn = document.getElementById('histTab' + k.charAt(0).toUpperCase() + k.slice(1));
+        if (btn) {
+          btn.className = k === sub
+            ? 'py-2 rounded-lg bg-[#16c784] text-[#06110c]'
+            : 'py-2 rounded-lg text-gray-400';
+        }
+      });
+      renderFullHistory();
+    }
+
+    function renderFullHistory() {
+      const box = document.getElementById('fullHistoryList');
+      if (!box) return;
+
+      if (historySubTab === 'deposits') {
+        if (!state.deposits.length) {
+          box.innerHTML = '<div class="text-center text-gray-500 py-6 text-xs">No deposits recorded yet.</div>';
+          return;
+        }
+        box.innerHTML = state.deposits.map((d) => 
+          <div class="p-3 rounded-xl bg-[#151921] border border-[#222938] flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold text-white">${d.method} • ${d.trxId}</div>
+              <div class="text-[10px] text-gray-400">${new Date(d.timestamp).toLocaleString()} ${d.bonus > 0 ? • Bonus +${formatMoney(d.bonus)} : ''}</div>
+            </div>
+            <div class="text-right font-mono">
+              <div class="font-bold text-[#16c784]">+${formatMoney(d.totalCredit)}</div>
+              <div class="text-[10px] text-emerald-300">${d.status}</div>
+            </div>
+          </div>
+        ).join('');
+      } else if (historySubTab === 'withdrawals') {
+        if (!state.withdrawals.length) {
+          box.innerHTML = '<div class="text-center text-gray-500 py-6 text-xs">No withdrawals recorded yet.</div>';
+          return;
+        }
+        box.innerHTML = state.withdrawals.map((w) => 
+          <div class="p-3 rounded-xl bg-[#151921] border border-[#222938] flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold text-white">${w.method} • ${w.account}</div>
+              <div class="text-[10px] text-gray-400">${new Date(w.timestamp).toLocaleString()} • 40% fee: ${formatMoney(w.fee)}</div>
+            </div>
+            <div class="text-right font-mono">
+              <div class="font-bold text-amber-300">Net ${formatMoney(w.netPayout)}</div>
+              <div class="text-[10px] text-gray-400">Req ${formatMoney(w.amount)}</div>
+            </div>
+          </div>
+        ).join('');
+      } else {
+        if (!state.trades.length) {
+          box.innerHTML = '<div class="text-center text-gray-500 py-6 text-xs">No trades recorded yet.</div>';
+          return;
+        }
+        box.innerHTML = state.trades.map((t) => {
+          const col = t.outcome === 'PROFIT' ? 'text-[#16c784]' : t.outcome === 'LOSS' ? 'text-[#ea3943]' : 'text-sky-300';
+          return 
+            <div class="p-3 rounded-xl bg-[#151921] border border-[#222938] flex items-center justify-between text-xs">
+              <div>
+                <div class="font-bold text-white">${t.pairName} (${t.direction} • ${t.durationLabel})</div>
+                <div class="text-[10px] text-gray-400">${new Date(t.timestamp).toLocaleString()} • ${t.mode.toUpperCase()}</div>
+              </div>
+              <div class="font-mono font-bold ${col}">${t.outcome} ${t.outcome === 'REFUND' ? formatMoney(t.amount) : (t.pnl >= 0 ? '+' : '-') + formatMoney(Math.abs(t.pnl))}</div>
+            </div>
+          ;
+        }).join('');
+      }
+    }
+
+    // INVITE FRIENDS VIA WHATSAPP
+    function openInviteFriendsModal() {
+      const inviteLink = ${window.location.origin}${window.location.pathname}?ref=${state.auth.uid};
+      const waMsg = please give my invite bonus | My UID: ${state.auth.uid} | Ref: ${inviteLink};
+      const waHref = https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(waMsg)};
+
+      document.getElementById('infoModalTitle').textContent = 'Invite Friends & Bonus';
+
+document.getElementById('infoModalBody').innerHTML = 
+        <div class="p-3 rounded-xl bg-[#0e1218] border border-[#232b3a] space-y-2">
+          <div class="text-xs font-bold text-emerald-300">120 BDT Invite Reward</div>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Share your referral link. When a referred member registers and deposits 200+, request your bonus on WhatsApp.
+          </p>
+          <div class="flex items-center justify-between text-xs font-mono bg-[#151b26] p-2 rounded-lg">
+            <span>Invited Members:</span>
+            <span class="text-[#16c784] font-bold">${state.invitedCount || 0}</span>
+          </div>
+        </div>
+
+        <div class="p-2.5 rounded-xl bg-[#0e1218] border border-[#252d3c] flex items-center justify-between gap-2">
+          <span class="text-[11px] font-mono text-gray-300 truncate">${inviteLink}</span>
+          <button type="button" onclick="copyTextValue('${inviteLink}', 'Invite link copied!')" class="px-2.5 py-1 rounded-lg bg-[#1b222e] text-[#16c784] font-bold text-xs shrink-0">
+            Copy
+          </button>
+        </div>
+
+        <a href="${waHref}" target="_blank" rel="noopener"
+          class="block w-full py-3 rounded-xl bg-[#16c784] hover:bg-[#14b476] text-[#06110c] font-extrabold text-xs text-center">
+          WhatsApp Invite Bonus ("please give my invite bonus")
+        </a>
+      ;
+      openModal('infoModal');
+    }
+
+    // AI LIVE CHAT ASSISTANT IN SETTINGS
+    function sendAiChatMessage(e) {
+      e.preventDefault();
+      const input = document.getElementById('aiChatInput');
+      const q = input.value.trim();
+      if (!q) return;
+      input.value = '';
+
+      const box = document.getElementById('aiChatMessages');
+      box.innerHTML += 
+        <div class="p-2 rounded-lg bg-[#1b2330] text-white text-right">
+          <span class="font-bold text-sky-300">You:</span> ${escapeHtml(q)}
+        </div>
+      ;
+
+      const lower = q.toLowerCase();
+      let reply = 'I can help explain deposits, withdrawals, turnover tiers, candlestick styles, or indicators. For serious or urgent account issues, please message WhatsApp 01750510914.';
+      if (lower.includes('withdraw') || lower.includes('উইথড্র')) {
+        reply = 'Withdrawals require completing your turnover requirement and reaching your deposit tier balance (800 BDT for ~120 BDT deposit tier, 1500 BDT for 300+ BDT deposit tier), with a 40% fee. If you face any issue, contact WhatsApp 01750510914.';
+      } else if (lower.includes('deposit') || lower.includes('ডিপোজিট')) {
+        reply = 'Minimum deposit is $1 (USD) or ৳120 (BDT) via bKash or Nagad Send Money to 01750510914. For urgent support, message WhatsApp 01750510914.';
+      } else if (lower.includes('indicator')  lower.includes('candle')  lower.includes('ক্যান্ডেল')) {
+        reply = 'You can switch between Standard, Hollow, and Heikin Ashi candles and activate any of the 10 indicators, Trendline, or Horizontal Line from the Indicators menu.';
+      }
+
+      box.innerHTML += 
+        <div class="p-2 rounded-lg bg-[#13221c] border border-[#16c784]/30 text-emerald-100 leading-relaxed">
+          <span class="font-bold text-[#16c784]">AI:</span> ${reply}
+        </div>
+      ;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+    }
+
+    // CURRENCY CONVERTER (BDT <-> USD)
+    function updateCurrencyConverter() {
+      const amt = Math.max(0, Number(document.getElementById('convAmountInput')?.value) || 0);
+      const dir = document.getElementById('convDirectionSelect')?.value || 'BDT_TO_USD';
+      const out = document.getElementById('convResultText');
+      if (!out) return;
+      if (dir === 'BDT_TO_USD') {
+        out.textContent = ৳${amt.toFixed(2)} = $${(amt / BDT_PER_USD).toFixed(2)};
+      } else {
+        out.textContent = $${amt.toFixed(2)} = ৳${(amt * BDT_PER_USD).toFixed(2)};
+      }
+    }
+
+function applyConvertedCurrencyToAccount() {
+      const dir = document.getElementById('convDirectionSelect')?.value || 'BDT_TO_USD';
+      state.auth.currency = dir === 'BDT_TO_USD' ? 'USD' : 'BDT';
+      saveState();
+      syncAllUI();
+      showToast(Active currency set to ${state.auth.currency}, 'success');
+    }
+
+    // SETTINGS, GALLERY BACKGROUND & PROFILE VERIFICATION PHOTOS
+    function applySettingsToUI() {
+      document.getElementById('gridOpacityValue').textContent = state.settings.gridOpacity;
+      document.getElementById('gridOpacityBarLabel').textContent = ${state.settings.gridOpacity} / 20;
+      setCandleStyle(state.settings.candleStyle || 'STANDARD');
+      applyChartBackground();
+      renderColorSwatches();
+      applyProfilePhotos();
+    }
+
+    function changeGridOpacity(delta) {
+      state.settings.gridOpacity = Math.max(0, Math.min(20, state.settings.gridOpacity + delta));
+      saveState();
+      applySettingsToUI();
+    }
+
+    function setChartBgPreset(idx) {
+      state.settings.bgPreset = idx;
+      state.settings.customBgUrl = '';
+      saveState();
+      applyChartBackground();
+    }
+
+    function handleCustomChartBgUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.settings.customBgUrl = String(reader.result || '');
+        saveState();
+        applyChartBackground();
+        showToast('Gallery photo set as chart background!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearCustomChartBg() {
+      state.settings.customBgUrl = '';
+      saveState();
+      applyChartBackground();
+      showToast('Chart background reset to preset', 'info');
+    }
+
+    function applyChartBackground() {
+      const wrap = document.getElementById('chartCanvasWrap');
+      if (!wrap) return;
+      const idx = state.settings.bgPreset || 0;
+      wrap.className = relative flex-1 w-full chart-bg-${idx} overflow-hidden;
+      if (state.settings.customBgUrl) {
+        wrap.style.backgroundImage = linear-gradient(rgba(7,9,12,0.72), rgba(7,9,12,0.72)), url("${state.settings.customBgUrl}");
+        wrap.style.backgroundSize = 'cover';
+        wrap.style.backgroundPosition = 'center';
+      } else {
+        wrap.style.backgroundImage = '';
+        wrap.style.backgroundSize = '';
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const btn = document.getElementById('bgPresetBtn' + i);
+        if (btn) {
+          btn.className = !state.settings.customBgUrl && i === idx
+            ? h-10 rounded-xl chart-bg-${i} border-2 border-[#16c784]
+            : h-10 rounded-xl chart-bg-${i} border border-[#2b3446];
+        }
+      }
+    }
+
+    function renderColorSwatches() {
+      const upBox = document.getElementById('upColorSwatches');
+      const downBox = document.getElementById('downColorSwatches');
+      if (!upBox || !downBox) return;
+
+      upBox.innerHTML = UP_COLORS.map((c) => {
+        const active = state.settings.upColor.toLowerCase() === c.toLowerCase();
+        return <button type="button" onclick="setCandleColor('up','${c}')" style="background:${c}" class="h-8 rounded-lg flex items-center justify-center text-xs font-extrabold text-white ${active ? 'ring-2 ring-white' : ''}">${active ? '✓' : ''}</button>;
+      }).join('');
+
+      downBox.innerHTML = DOWN_COLORS.map((c) => {
+        const active = state.settings.downColor.toLowerCase() === c.toLowerCase();
+        return <button type="button" onclick="setCandleColor('down','${c}')" style="background:${c}" class="h-8 rounded-lg flex items-center justify-center text-xs font-extrabold text-white ${active ? 'ring-2 ring-white' : ''}">${active ? '✓' : ''}</button>;
+      }).join('');
+    }
+
+    function setCandleColor(side, hex) {
+      if (side === 'up') state.settings.upColor = hex;
+      else state.settings.downColor = hex;
+      saveState();
+      renderColorSwatches();
+    }
+
+function openVerificationModal() {
+      document.getElementById('verCountry').value = state.verification.country || 'Bangladesh';
+      document.getElementById('verDistrict').value = state.verification.district || '';
+      document.getElementById('verAge').value = state.verification.age || '';
+      document.getElementById('verDob').value = state.verification.dob || '';
+      document.getElementById('verMobile').value = state.verification.mobile  state.auth.phone  '';
+      const img = document.getElementById('verPhotoPreviewImg');
+      if (state.verification.photoDataUrl) {
+        img.src = state.verification.photoDataUrl;
+        img.classList.remove('hidden');
+      } else {
+        img.classList.add('hidden');
+      }
+      openModal('verifyModal');
+    }
+
+    function handleVerifyPhotoUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.verification.photoDataUrl = String(reader.result || '');
+        const img = document.getElementById('verPhotoPreviewImg');
+        img.src = state.verification.photoDataUrl;
+        img.classList.remove('hidden');
+        saveState();
+        applyProfilePhotos();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleCoverPhotoUpload(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        state.verification.coverDataUrl = String(reader.result || '');
+        saveState();
+        applyProfilePhotos();
+        showToast('Cover photo updated!', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function applyProfilePhotos() {
+      const avInner = document.getElementById('profileAvatarInner');
+      if (avInner) {
+        if (state.verification.photoDataUrl) {
+          avInner.innerHTML = <img src="${state.verification.photoDataUrl}" alt="Avatar" class="w-full h-full object-cover" />;
+        } else {
+          avInner.textContent = 'CP';
+        }
+      }
+      const cov = document.getElementById('profileCoverBanner');
+      if (cov && state.verification.coverDataUrl) {
+        cov.style.backgroundImage = linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url("${state.verification.coverDataUrl}");
+        cov.style.backgroundSize = 'cover';
+        cov.style.backgroundPosition = 'center';
+      }
+    }
+
+    function submitVerificationForm(e) {
+      e.preventDefault();
+      const country = document.getElementById('verCountry').value.trim();
+      const district = document.getElementById('verDistrict').value.trim();
+      const age = Number(document.getElementById('verAge').value);
+      const dob = document.getElementById('verDob').value;
+      const mobile = document.getElementById('verMobile').value.trim();
+
+      if (!age || age < 18) {
+        showToast('Age must be 18 or above for verification.', 'error');
+        return;
+      }
+
+      state.verification = {
+        ...state.verification,
+        verified: true,
+        country,
+        district,
+        age,
+        dob,
+        mobile,
+      };
+      saveState();
+      syncProfileVerificationBadge();
+      closeAllModals();
+
+      const msg = I am verified now | UID: ${state.auth.uid} | Country: ${country} | District: ${district} | Age: ${age} | Mobile: ${mobile};
+      window.open(https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}, '_blank', 'noopener');
+      showToast('Account marked as Verified!', 'success');
+    }
+
+    function syncProfileVerificationBadge() {
+      const verified = !!state.verification.verified;
+      const dot = document.getElementById('profileVerifyBadgeDot');
+      const pill = document.getElementById('profileVerifyStatusPill');
+      if (!dot || !pill) return;
+
+if (verified) {
+        dot.className = 'w-5 h-5 rounded-full bg-[#16c784] text-[#06110c] text-[11px] font-extrabold flex items-center justify-center absolute -bottom-1 -right-1 border-2 border-[#151921]';
+        dot.textContent = '✓';
+        pill.className = 'inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-[#16c784]/15 border border-[#16c784]/40 text-[10px] font-bold text-[#16c784]';
+        pill.textContent = '✓ Verified';
+      } else {
+        dot.className = 'w-5 h-5 rounded-full bg-[#ea3943] text-white text-[11px] font-bold flex items-center justify-center absolute -bottom-1 -right-1 border-2 border-[#151921]';
+        dot.textContent = '✕';
+        pill.className = 'inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-md bg-red-500/15 border border-red-500/40 text-[10px] font-bold text-red-400';
+        pill.textContent = '✕ Unverified';
+      }
+    }
+
+    function syncProfileForm() {
+      document.getElementById('profileEmailDisplay').textContent = state.auth.email;
+      document.getElementById('profilePhoneDisplay').textContent = state.auth.phone || '01700000000';
+      document.getElementById('profileUidRow').textContent = state.auth.uid;
+      document.getElementById('profileTotalDepositedRow').textContent = formatMoney(state.balances.totalDeposited || 0);
+      document.getElementById('profileTurnoverRow').textContent = formatMoney(state.balances.turnoverCompleted || 0);
+
+      document.getElementById('pdNickname').value = state.profile.nickname || '';
+      document.getElementById('pdFirstName').value = state.profile.firstName || '';
+      document.getElementById('pdLastName').value = state.profile.lastName || '';
+      document.getElementById('pdDob').value = state.profile.dob || '';
+      document.getElementById('pdCountry').value = state.profile.country || 'Bangladesh';
+      syncProfileVerificationBadge();
+      applyProfilePhotos();
+    }
+
+    function savePersonalDetails(e) {
+      e.preventDefault();
+      state.profile = {
+        nickname: document.getElementById('pdNickname').value.trim(),
+        firstName: document.getElementById('pdFirstName').value.trim(),
+        lastName: document.getElementById('pdLastName').value.trim(),
+        dob: document.getElementById('pdDob').value,
+        country: document.getElementById('pdCountry').value.trim(),
+      };
+      saveState();
+      showToast('Personal details saved!', 'success');
+    }
+
+    // 24-HOUR LEADERBOARD WITH DYNAMIC USER RANKING
+    function renderLeaderboard() {
+      const daySlot = Math.floor(Date.now() / (24 * 60 * 60 * 1000)) % LEADERBOARD_POOL.length;
+      const board = LEADERBOARD_POOL.map((item, idx) => {
+        const shifted = LEADERBOARD_POOL[(daySlot + idx) % LEADERBOARD_POOL.length];
+        return {
+          name: shifted.name,
+          country: shifted.country,
+          flag: shifted.flag,
+          pnl: shifted.basePnl,
+          isUser: false,
+        };
+      });
+
+      const userName = state.profile.nickname  state.profile.firstName  Trader #${state.auth.uid};
+      const userCountry = state.profile.country  state.verification.country  'Bangladesh';
+      const userPnl = Number(state.livePnl24h) || 0;
+
+      board.push({
+        name: userName,
+        country: userCountry,
+        flag: '⚡',
+        pnl: userPnl,
+        isUser: true,
+      });
+
+      board.sort((a, b) => b.pnl - a.pnl);
+      const userRank = board.findIndex((x) => x.isUser) + 1;
+
+      document.getElementById('lbUserRankBadge').textContent = Rank #${userRank} • #${state.auth.uid};
+      const pnlEl = document.getElementById('lbUserPnlText');
+      pnlEl.textContent = ${userPnl >= 0 ? '+' : '-'}${formatMoney(Math.abs(userPnl))};
+      pnlEl.className = text-sm font-mono font-extrabold ${userPnl >= 0 ? 'text-[#16c784]' : 'text-[#ea3943]'};
+
+document.getElementById('leaderboardRows').innerHTML = board.slice(0, 12).map((row, i) => {
+        const rank = i + 1;
+        const highlight = row.isUser ? 'bg-[#13251e] border-[#16c784]' : 'bg-[#151921] border-[#222937]';
+        return 
+          <div class="rounded-xl ${highlight} border px-3.5 py-2.5 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="w-6 h-6 rounded-lg bg-[#1b212d] text-gray-200 font-mono font-bold text-xs flex items-center justify-center">${rank}</span>
+              <span class="text-base">${row.flag}</span>
+              <div>
+                <div class="text-xs font-bold text-white">${escapeHtml(row.name)} ${row.isUser ? '<span class="text-[10px] text-[#16c784]">(YOU)</span>' : ''}</div>
+                <div class="text-[10px] text-gray-400">${escapeHtml(row.country)}</div>
+              </div>
+            </div>
+            <div class="text-xs font-mono font-extrabold ${row.pnl >= 0 ? 'text-[#16c784]' : 'text-[#ea3943]'}">
+              ${row.pnl >= 0 ? '+' : '-'}${formatMoney(Math.abs(row.pnl))}
+            </div>
+          </div>
+        ;
+      }).join('');
+    }
+
+    // MODALS & HELPERS
+    function openModal(modalId) {
+      document.getElementById('modalBackdrop').classList.remove('hidden');
+      ['depositModal', 'withdrawModal', 'verifyModal', 'pairPickerModal', 'infoModal'].forEach((id) => {
+        document.getElementById(id).classList.toggle('hidden', id !== modalId);
+      });
+    }
+
+    function closeAllModals() {
+      document.getElementById('modalBackdrop').classList.add('hidden');
+    }
+
+    function openPairPickerModal() {
+      const list = document.getElementById('modalMarketList');
+      list.innerHTML = MARKET_PAIRS.map((p) => {
+        const pos = p.change >= 0;
+        return 
+          <button type="button" onclick="selectPair('${p.id}')" class="w-full text-left rounded-xl bg-[#191f2b] hover:bg-[#222938] border border-[#293244] px-3 py-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-base">${p.flags}</span>
+              <div>
+                <div class="text-xs font-extrabold text-white">${p.name} <span class="text-[10px] text-amber-300">${p.type}</span></div>
+                <div class="text-[10px] text-[#16c784] font-semibold">Payout ${p.payout}%</div>
+              </div>
+            </div>
+            <span class="text-xs font-mono font-bold ${pos ? 'text-[#16c784]' : 'text-[#ea3943]'}">${pos ? '+' : ''}${p.change}%</span>
+          </button>
+        ;
+      }).join('');
+      openModal('pairPickerModal');
+    }
+
+    function openNotificationsModal() {
+      document.getElementById('infoModalTitle').textContent = 'Notifications';
+      document.getElementById('infoModalBody').innerHTML = state.notifications.map((n) => 
+        <div class="p-3 rounded-xl bg-[#0e1218] border border-[#232b3a]">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white">${n.title}</span>
+            <span class="text-[10px] text-gray-500">${n.time}</span>
+          </div>
+          <p class="text-gray-300 mt-1 leading-relaxed">${n.text}</p>
+        </div>
+      ).join('');
+      openModal('infoModal');
+    }
+
+    function copyTextValue(val, toastMsg) {
+      const ta = document.createElement('textarea');
+      ta.value = val;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+      } catch (e) {}
+      document.body.removeChild(ta);
+      showToast(toastMsg, 'success');
+    }
+
+    // BOOTSTRAP
+    window.addEventListener('DOMContentLoaded', () => {
+      populateLanguageSelectors();
+      selectAuthCurrency(state.auth.currency || 'USD');
+      syncTradeDurationUI();
+      setupChartInteractions();
+      window.addEventListener('resize', resizeChartCanvas);
+
+      setInterval(() => {
+        if (state.auth.isLoggedIn) {
+          syncCandleClock(false);
+          renderActiveTradesBadges();
+        }
+      }, 250);
+
+function frameLoop() {
+        if (state.auth.isLoggedIn && activeTab === 'chart') {
+          renderCandlestickChart();
+        }
+        requestAnimationFrame(frameLoop);
+      }
+      requestAnimationFrame(frameLoop);
+
+      runPreloader(() => {
+        const sessionValid = state.auth.isLoggedIn && Date.now() < (state.auth.expiresAt || 0);
+        if (sessionValid) {
+          enterMainApp();
+        } else {
+          document.getElementById('authScreen').classList.remove('hidden');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
